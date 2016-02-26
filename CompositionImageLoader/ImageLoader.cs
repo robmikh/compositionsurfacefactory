@@ -100,23 +100,21 @@ namespace Robmikh.Util.CompositionImageLoader
             {
                 _canvasDevice.DeviceLost -= DeviceLost;
                 _canvasDevice.Dispose();
+                _canvasDevice = null;
             }
 
-            _canvasDevice = sender;
-            _canvasDevice.DeviceLost += DeviceLost;
-        }
-
-        private void RenderingDeviceReplaced(CompositionGraphicsDevice sender, RenderingDeviceReplacedEventArgs args)
-        {
             if (_graphicsDevice != null)
             {
                 _graphicsDevice.RenderingDeviceReplaced -= RenderingDeviceReplaced;
                 _graphicsDevice.Dispose();
+                _graphicsDevice = null;
             }
 
-            _graphicsDevice = sender;
-            _graphicsDevice.RenderingDeviceReplaced += RenderingDeviceReplaced;
+            CreateDevice();
+        }
 
+        private void RenderingDeviceReplaced(CompositionGraphicsDevice sender, RenderingDeviceReplacedEventArgs args)
+        {
             Task.Run(() =>
             {
                 if (DeviceReplacedEvent != null)
