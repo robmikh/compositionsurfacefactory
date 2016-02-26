@@ -124,11 +124,9 @@
   <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets" />
   -->
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
-
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
     <!--<WebDownload Condition="!Exists('nuget.exe')" Filename="nuget.exe" FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" /> -->
-
-    <Exec Command="nuget pack CompositionImageLoader.csproj -IncludeReferencedProjects -Prop Configuration=Release"></Exec>
-
+    <Exec Command="nuget pack CompositionImageLoader.csproj -IncludeReferencedProjects -Prop Configuration=Release">
+    </Exec>
   </Target>
 </Project>

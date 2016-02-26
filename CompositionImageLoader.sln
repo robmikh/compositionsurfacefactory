@@ -5,8 +5,6 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompositionImageLoader", "CompositionImageLoader\CompositionImageLoader.csproj", "{AD0E6E4B-452B-47C3-94AC-C7BC0068C61B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{B3C8C125-FCAF-4E20-B873-32927F2B4847}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,26 +33,6 @@ Global
 		{AD0E6E4B-452B-47C3-94AC-C7BC0068C61B}.Release|x64.Build.0 = Release|x64
 		{AD0E6E4B-452B-47C3-94AC-C7BC0068C61B}.Release|x86.ActiveCfg = Release|x86
 		{AD0E6E4B-452B-47C3-94AC-C7BC0068C61B}.Release|x86.Build.0 = Release|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|ARM.ActiveCfg = Debug|ARM
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|ARM.Build.0 = Debug|ARM
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|ARM.Deploy.0 = Debug|ARM
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|x64.ActiveCfg = Debug|x64
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|x64.Build.0 = Debug|x64
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|x64.Deploy.0 = Debug|x64
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|x86.ActiveCfg = Debug|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|x86.Build.0 = Debug|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Debug|x86.Deploy.0 = Debug|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|Any CPU.ActiveCfg = Release|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|ARM.ActiveCfg = Release|ARM
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|ARM.Build.0 = Release|ARM
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|ARM.Deploy.0 = Release|ARM
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|x64.ActiveCfg = Release|x64
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|x64.Build.0 = Release|x64
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|x64.Deploy.0 = Release|x64
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|x86.ActiveCfg = Release|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|x86.Build.0 = Release|x86
-		{B3C8C125-FCAF-4E20-B873-32927F2B4847}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
