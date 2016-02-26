@@ -30,12 +30,6 @@ namespace Robmikh.Util.CompositionImageLoader
             return imageLoader;
         }
 
-        public static IImageLoader CreateImageLoader(int taco)
-        {
-            var imageLoader = new ImageLoader();
-            return imageLoader;
-        }
-
         public static IImageLoader CreateImageLoader(CompositionGraphicsDevice graphicsDevice)
         {
             var imageLoader = new ImageLoader();
