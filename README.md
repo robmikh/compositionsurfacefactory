@@ -16,6 +16,11 @@ var surface1 = imageLoader.LoadImageFromUri(new Uri("ms-appx:///Assets/Images/te
 var surface2 = await await imageLoader.LoadImageFromUriAsync(new Uri("ms-appx:///Assets/Images/testimage.png"));
 ```
 You can also pass in a CompositionGraphicsDevice instead of a Compositor if you already have a device you would like the ImageLoader to use.
+```
+var imageLoader = ImageLoaderFactory.CreateImageLoader(_compositionGraphicsDevice);
+var surface1 = imageLoader.LoadImageFromUri(new Uri("ms-appx:///Assets/Images/testimage.png"));
+var surface2 = await await imageLoader.LoadImageFromUriAsync(new Uri("ms-appx:///Assets/Images/testimage.png"));
+```
 
 ### LoadImageFromUri vs LoadImageFromUriAsync
 LoadImageFromUri will immediately return a surface that is initially be empty. Later on a thread pool thread, the surface will be resized and filled in with the decoded image. This means that the call is synchronous but the image won't actually be loaded until a later time.
