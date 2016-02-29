@@ -13,13 +13,13 @@ Loading images into a surface is easy using CompositionImageLoader:
 ```
 var imageLoader = ImageLoaderFactory.CreateImageLoader(_compositor);
 var surface1 = imageLoader.LoadImageFromUri(new Uri("ms-appx:///Assets/Images/testimage.png"));
-var surface2 = await await imageLoader.LoadImageFromUriAsync(new Uri("ms-appx:///Assets/Images/testimage.png"));
+var surface2 = await imageLoader.LoadImageFromUriAsync(new Uri("ms-appx:///Assets/Images/testimage.png"));
 ```
 You can also pass in a CompositionGraphicsDevice instead of a Compositor if you already have a device you would like the ImageLoader to use.
 ```
 var imageLoader = ImageLoaderFactory.CreateImageLoader(_compositionGraphicsDevice);
 var surface1 = imageLoader.LoadImageFromUri(new Uri("ms-appx:///Assets/Images/testimage.png"));
-var surface2 = await await imageLoader.LoadImageFromUriAsync(new Uri("ms-appx:///Assets/Images/testimage.png"));
+var surface2 = await imageLoader.LoadImageFromUriAsync(new Uri("ms-appx:///Assets/Images/testimage.png"));
 ```
 
 ### LoadImageFromUri vs LoadImageFromUriAsync

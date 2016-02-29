@@ -113,12 +113,12 @@ namespace Robmikh.Util.CompositionImageLoader
             {
                 if (DeviceReplacedEvent != null)
                 {
-                    RaiseDeveiceReplacedEvent();
+                    RaiseDeviceReplacedEvent();
                 }
             });
         }
 
-        private void RaiseDeveiceReplacedEvent()
+        private void RaiseDeviceReplacedEvent()
         {
             var deviceEvent = DeviceReplacedEvent;
             if (deviceEvent != null)
