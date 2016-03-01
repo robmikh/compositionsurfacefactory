@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.DirectX;
+using Windows.Graphics.Display;
 using Windows.UI.Composition;
 
 namespace Robmikh.Util.CompositionImageLoader
@@ -57,19 +58,30 @@ namespace Robmikh.Util.CompositionImageLoader
 
         private bool _isDeviceCreator;
 
-        public ImageLoader() { }
+        public ImageLoader() { Debug.WriteLine("CompositionImageLoader - ImageLoader Created"); }
+
+        private void OnDisplayContentsInvalidated(DisplayInformation sender, object args)
+        {
+            Debug.WriteLine("CompositionImageLoader - Display Contents Invalidated");
+            //
+            // This will trigger the device lost event
+            //
+            CanvasDevice.GetSharedDevice();
+        }
 
         public void Initialize(Compositor compositor)
         {
             _compositor = compositor;
             _deviceLock = new object();
             _isDeviceCreator = true;
+            DisplayInformation.DisplayContentsInvalidated += OnDisplayContentsInvalidated;
             CreateDevice();
         }
 
         public void Initialize(CompositionGraphicsDevice graphicsDevice)
         {
             _graphicsDevice = graphicsDevice;
+            _graphicsDevice.RenderingDeviceReplaced += RenderingDeviceReplaced;
             _deviceLock = new object();
             _isDeviceCreator = false;
             //
@@ -98,25 +110,18 @@ namespace Robmikh.Util.CompositionImageLoader
 
         private void DeviceLost(CanvasDevice sender, object args)
         {
-            if (_canvasDevice != null)
-            {
-                _canvasDevice.DeviceLost -= DeviceLost;
-                _canvasDevice.Dispose();
-                _canvasDevice = null;
-            }
+            Debug.WriteLine("CompositionImageLoader - Canvas Device Lost");
+            sender.DeviceLost -= DeviceLost;
 
-            if (_graphicsDevice != null)
-            {
-                _graphicsDevice.RenderingDeviceReplaced -= RenderingDeviceReplaced;
-                _graphicsDevice.Dispose();
-                _graphicsDevice = null;
-            }
+            _canvasDevice = CanvasDevice.GetSharedDevice();
+            _canvasDevice.DeviceLost += DeviceLost;
 
-            CreateDevice();
+            CanvasComposition.SetCanvasDevice(_graphicsDevice, _canvasDevice);
         }
 
         private void RenderingDeviceReplaced(CompositionGraphicsDevice sender, RenderingDeviceReplacedEventArgs args)
         {
+            Debug.WriteLine("CompositionImageLoader - Rendering Device Replaced");
             Task.Run(() =>
             {
                 if (DeviceReplacedEvent != null)
@@ -133,7 +138,6 @@ namespace Robmikh.Util.CompositionImageLoader
             {
                 deviceEvent(this, new EventArgs());
             }
-
         }
 
         public CompositionDrawingSurface LoadImageFromUri(Uri uri)
@@ -225,6 +229,7 @@ namespace Robmikh.Util.CompositionImageLoader
             lock(_deviceLock)
             {
                 _compositor = null;
+                DisplayInformation.DisplayContentsInvalidated -= OnDisplayContentsInvalidated;
 
                 if (_canvasDevice != null)
                 {
