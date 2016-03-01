@@ -16,8 +16,16 @@ namespace Robmikh.Util.CompositionImageLoader
     public interface IImageLoader : IDisposable
     {
         event EventHandler<Object> DeviceReplacedEvent;
-        ICompositionSurface LoadImageFromUri(Uri uri);
-        IAsyncOperation<ICompositionSurface> LoadImageFromUriAsync(Uri uri);
+        CompositionDrawingSurface LoadImageFromUri(Uri uri);
+        IAsyncOperation<CompositionDrawingSurface> LoadImageFromUriAsync(Uri uri);
+        IManagedSurface CreateManagedSurfaceFromUri(Uri uri);
+        IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri);
+    }
+
+    interface IImageLoaderInternal : IImageLoader
+    {
+        CompositionDrawingSurface CreateSurface();
+        Task DrawSurface(CompositionDrawingSurface surface, Uri uri);
     }
 
     public static class ImageLoaderFactory
@@ -38,7 +46,7 @@ namespace Robmikh.Util.CompositionImageLoader
         }
     }
 
-    class ImageLoader : IImageLoader
+    class ImageLoader : IImageLoaderInternal
     {
         public event EventHandler<Object> DeviceReplacedEvent;
 
@@ -128,13 +136,9 @@ namespace Robmikh.Util.CompositionImageLoader
 
         }
 
-        public ICompositionSurface LoadImageFromUri(Uri uri)
+        public CompositionDrawingSurface LoadImageFromUri(Uri uri)
         {
-            //
-            // We start out with a size of 0,0 for the surface, because we don't know
-            // the size of the image at this time. We resize the surface later.
-            //
-            var surface = _graphicsDevice.CreateDrawingSurface(new Size(0, 0), DirectXPixelFormat.B8G8R8A8UIntNormalized, DirectXAlphaMode.Premultiplied);
+            var surface = CreateSurface();
 
             //
             // We don't await this call, as we want it to happen
@@ -145,25 +149,42 @@ namespace Robmikh.Util.CompositionImageLoader
             return surface;
         }
 
-        private async Task<ICompositionSurface> LoadImageFromUriAsyncWorker(Uri uri)
+        private async Task<CompositionDrawingSurface> LoadImageFromUriAsyncWorker(Uri uri)
         {
-            //
-            // We start out with a size of 0,0 for the surface, because we don't know
-            // the size of the image at this time. We resize the surface later.
-            //
-            var surface = _graphicsDevice.CreateDrawingSurface(new Size(0, 0), DirectXPixelFormat.B8G8R8A8UIntNormalized, DirectXAlphaMode.Premultiplied);
+            var surface = CreateSurface();
 
             await DrawSurface(surface, uri);
 
             return surface;
         }
 
-        public IAsyncOperation<ICompositionSurface> LoadImageFromUriAsync(Uri uri)
+        public IAsyncOperation<CompositionDrawingSurface> LoadImageFromUriAsync(Uri uri)
         {
-            return LoadImageFromUriAsyncWorker(uri).AsAsyncOperation<ICompositionSurface>();
+            return LoadImageFromUriAsyncWorker(uri).AsAsyncOperation<CompositionDrawingSurface>();
         }
 
-        private async Task DrawSurface(CompositionDrawingSurface surface, Uri uri)
+        public IManagedSurface CreateManagedSurfaceFromUri(Uri uri)
+        {
+            var managedSurface = new ManagedSurface(this, uri);
+            managedSurface.RedrawSurface();
+
+            return managedSurface;
+        }
+
+        public async Task<IManagedSurface> CreateManagedSurfaceFromUriAsyncWorker(Uri uri)
+        {
+            var managedSurface = new ManagedSurface(this, uri);
+            await managedSurface.RedrawSurface();
+
+            return managedSurface;
+        }
+
+        public IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri)
+        {
+            return CreateManagedSurfaceFromUriAsyncWorker(uri).AsAsyncOperation<IManagedSurface>();
+        }
+
+        public async Task DrawSurface(CompositionDrawingSurface surface, Uri uri)
         {
             using (var canvasBitmap = await CanvasBitmap.LoadAsync(_canvasDevice, uri))
             {
@@ -186,6 +207,17 @@ namespace Robmikh.Util.CompositionImageLoader
                     }
                 }
             }
+        }
+
+        public CompositionDrawingSurface CreateSurface()
+        {
+            //
+            // We start out with a size of 0,0 for the surface, because we don't know
+            // the size of the image at this time. We resize the surface later.
+            //
+            var surface = _graphicsDevice.CreateDrawingSurface(new Size(0, 0), DirectXPixelFormat.B8G8R8A8UIntNormalized, DirectXAlphaMode.Premultiplied);
+
+            return surface;
         }
 
         public void Dispose()
