@@ -13,6 +13,7 @@ namespace Robmikh.Util.CompositionImageLoader
     {
         IImageLoader ImageLoader { get; }
         ICompositionSurface Surface { get; }
+        Uri Source { get; }
         IAsyncAction RedrawSurface();
         IAsyncAction RedrawSurface(Uri uri);
     }
@@ -36,6 +37,14 @@ namespace Robmikh.Util.CompositionImageLoader
             get
             {
                 return _surface;
+            }
+        }
+
+        public Uri Source
+        {
+            get
+            {
+                return _uri;
             }
         }
 
