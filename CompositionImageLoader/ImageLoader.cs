@@ -10,7 +10,9 @@ using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.DirectX;
 using Windows.Graphics.Display;
+using Windows.UI;
 using Windows.UI.Composition;
+using Windows.UI.Text;
 
 namespace Robmikh.Util.CompositionImageLoader
 {
@@ -25,6 +27,17 @@ namespace Robmikh.Util.CompositionImageLoader
         IManagedSurface CreateManagedSurfaceFromUri(Uri uri, Size size);
         IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri);
         IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri, Size size);
+        ITextSurface CreateTextSurface(String text);
+        ITextSurface CreateTextSurface(String text,
+                                       float width,
+                                       float height,
+                                       String fontFamily,
+                                       float fontSize,
+                                       FontStyle fontStyle,
+                                       WordWrapping wordWrapping,
+                                       Padding padding,
+                                       Color foreground,
+                                       Color background);
     }
 
     interface IImageLoaderInternal : IImageLoader
@@ -210,6 +223,41 @@ namespace Robmikh.Util.CompositionImageLoader
         public IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri, Size size)
         {
             return CreateManagedSurfaceFromUriAsyncWorker(uri, size).AsAsyncOperation<IManagedSurface>();
+        }
+
+        public ITextSurface CreateTextSurface(String text)
+        {
+            var textSurface = new TextSurface(this, text);
+            textSurface.RedrawSurface();
+
+            return textSurface;
+        }
+
+        public ITextSurface CreateTextSurface(String text,
+                                              float width,
+                                              float height,
+                                              String fontFamily,
+                                              float fontSize,
+                                              FontStyle fontStyle,
+                                              WordWrapping wordWrapping,
+                                              Padding padding,
+                                              Color foreground,
+                                              Color background)
+        {
+            var textSurface = new TextSurface(this,
+                                              text,
+                                              width,
+                                              height,
+                                              fontFamily,
+                                              fontSize,
+                                              fontStyle,
+                                              wordWrapping,
+                                              padding,
+                                              foreground,
+                                              background);
+            textSurface.RedrawSurface();
+
+            return textSurface;
         }
 
         public async Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size)
