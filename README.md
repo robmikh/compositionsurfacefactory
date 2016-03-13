@@ -49,7 +49,7 @@ var textSurface = _imageLoader.CreateTextSurface("Hello, World!");
 visual.Brush = _compositor.CreateSurfaceBrush(textSurface.Surface);
 ```
 
-It's important to note that changing properties telsl the TextSurface to redraw, so if you're going to do a lot of customization, it might be wise to do most of it at creation time:
+It's important to note that changing properties tells the TextSurface to redraw, so if you're going to do a lot of customization, it might be wise to do most of it at creation time:
 
 ```
 var textSurface= _imageLoader.CreateTextSurface(reallyLongString,       // Text
