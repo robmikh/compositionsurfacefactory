@@ -18,15 +18,20 @@ namespace Robmikh.Util.CompositionImageLoader
     {
         event EventHandler<Object> DeviceReplacedEvent;
         CompositionDrawingSurface LoadImageFromUri(Uri uri);
+        CompositionDrawingSurface LoadImageFromUri(Uri uri, Size size);
         IAsyncOperation<CompositionDrawingSurface> LoadImageFromUriAsync(Uri uri);
+        IAsyncOperation<CompositionDrawingSurface> LoadImageFromUriAsync(Uri uri, Size size);
         IManagedSurface CreateManagedSurfaceFromUri(Uri uri);
+        IManagedSurface CreateManagedSurfaceFromUri(Uri uri, Size size);
         IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri);
+        IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri, Size size);
     }
 
     interface IImageLoaderInternal : IImageLoader
     {
-        CompositionDrawingSurface CreateSurface();
-        Task DrawSurface(CompositionDrawingSurface surface, Uri uri);
+        CompositionDrawingSurface CreateSurface(Size size);
+        void ResizeSurface(CompositionDrawingSurface surface, Size size);
+        Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size);
     }
 
     public static class ImageLoaderFactory
@@ -54,11 +59,11 @@ namespace Robmikh.Util.CompositionImageLoader
         private Compositor _compositor;
         private CanvasDevice _canvasDevice;
         private CompositionGraphicsDevice _graphicsDevice;
-        private Object _deviceLock;
+        private Object _drawingLock;
 
         private bool _isDeviceCreator;
 
-        public ImageLoader() { Debug.WriteLine("CompositionImageLoader - ImageLoader Created"); }
+        public ImageLoader() { }
 
         private void OnDisplayContentsInvalidated(DisplayInformation sender, object args)
         {
@@ -72,7 +77,7 @@ namespace Robmikh.Util.CompositionImageLoader
         public void Initialize(Compositor compositor)
         {
             _compositor = compositor;
-            _deviceLock = new object();
+            _drawingLock = new object();
             _isDeviceCreator = true;
             DisplayInformation.DisplayContentsInvalidated += OnDisplayContentsInvalidated;
             CreateDevice();
@@ -82,7 +87,7 @@ namespace Robmikh.Util.CompositionImageLoader
         {
             _graphicsDevice = graphicsDevice;
             _graphicsDevice.RenderingDeviceReplaced += RenderingDeviceReplaced;
-            _deviceLock = new object();
+            _drawingLock = new object();
             _isDeviceCreator = false;
             //
             // We don't call CreateDevice, as it wouldn't do anything
@@ -142,42 +147,56 @@ namespace Robmikh.Util.CompositionImageLoader
 
         public CompositionDrawingSurface LoadImageFromUri(Uri uri)
         {
-            var surface = CreateSurface();
+            return LoadImageFromUri(uri, Size.Empty);
+        }
+
+        public CompositionDrawingSurface LoadImageFromUri(Uri uri, Size size)
+        {
+            var surface = CreateSurface(size);
 
             //
-            // We don't await this call, as we want it to happen
-            // seperately on a thread pool thread.
+            // We don't await this call, as we don't want to block
+            // the caller.
             //
-            DrawSurface(surface, uri);
+            var ignored = DrawSurface(surface, uri, size);
 
             return surface;
         }
 
-        private async Task<CompositionDrawingSurface> LoadImageFromUriAsyncWorker(Uri uri)
+        private async Task<CompositionDrawingSurface> LoadImageFromUriAsyncWorker(Uri uri, Size size)
         {
-            var surface = CreateSurface();
+            var surface = CreateSurface(size);
 
-            await DrawSurface(surface, uri);
+            await DrawSurface(surface, uri, size);
 
             return surface;
         }
 
         public IAsyncOperation<CompositionDrawingSurface> LoadImageFromUriAsync(Uri uri)
         {
-            return LoadImageFromUriAsyncWorker(uri).AsAsyncOperation<CompositionDrawingSurface>();
+            return LoadImageFromUriAsync(uri, Size.Empty);
+        }
+        public IAsyncOperation<CompositionDrawingSurface> LoadImageFromUriAsync(Uri uri, Size size)
+        {
+            return LoadImageFromUriAsyncWorker(uri, size).AsAsyncOperation<CompositionDrawingSurface>();
         }
 
         public IManagedSurface CreateManagedSurfaceFromUri(Uri uri)
         {
-            var managedSurface = new ManagedSurface(this, uri);
-            managedSurface.RedrawSurface();
+            return CreateManagedSurfaceFromUri(uri, Size.Empty);
+        }
+
+        public IManagedSurface CreateManagedSurfaceFromUri(Uri uri, Size size)
+        {
+            var managedSurface = new ManagedSurface(this, uri, size);
+            var ignored = managedSurface.RedrawSurface();
 
             return managedSurface;
         }
 
-        public async Task<IManagedSurface> CreateManagedSurfaceFromUriAsyncWorker(Uri uri)
+        public async Task<IManagedSurface> CreateManagedSurfaceFromUriAsyncWorker(Uri uri, Size size)
         {
-            var managedSurface = new ManagedSurface(this, uri);
+            var managedSurface = new ManagedSurface(this, uri, size);
             await managedSurface.RedrawSurface();
 
             return managedSurface;
@@ -185,48 +204,76 @@ namespace Robmikh.Util.CompositionImageLoader
 
         public IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri)
         {
-            return CreateManagedSurfaceFromUriAsyncWorker(uri).AsAsyncOperation<IManagedSurface>();
+            return CreateManagedSurfaceFromUriAsyncWorker(uri, Size.Empty).AsAsyncOperation<IManagedSurface>();
         }
 
-        public async Task DrawSurface(CompositionDrawingSurface surface, Uri uri)
+        public IAsyncOperation<IManagedSurface> CreateManagedSurfaceFromUriAsync(Uri uri, Size size)
+        {
+            return CreateManagedSurfaceFromUriAsyncWorker(uri, size).AsAsyncOperation<IManagedSurface>();
+        }
+
+        public async Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size)
         {
             using (var canvasBitmap = await CanvasBitmap.LoadAsync(_canvasDevice, uri))
             {
-                var size = canvasBitmap.Size;
+                var bitmapSize = canvasBitmap.Size;
 
                 //
                 // Because the drawing is done asynchronously and multiple threads could
                 // be trying to get access to the device/surface at the same time, we need
                 // to do any device/surface work under a lock.
                 //
-                lock (_deviceLock)
+                lock (_drawingLock)
                 {
-                    // Resize the surface to the size of the image
-                    CanvasComposition.Resize(surface, size);
+                    Size surfaceSize = size;
+                    if (surfaceSize.IsEmpty)
+                    {
+                        // Resize the surface to the size of the image
+                        CanvasComposition.Resize(surface, bitmapSize);
+                        surfaceSize = bitmapSize;
+                    }
+
                     // Draw the image to the surface
                     using (var session = CanvasComposition.CreateDrawingSession(surface))
                     {
                         session.Clear(Windows.UI.Color.FromArgb(0, 0, 0, 0));
-                        session.DrawImage(canvasBitmap, new Rect(0, 0, size.Width, size.Height), new Rect(0, 0, size.Width, size.Height));
+                        session.DrawImage(canvasBitmap, new Rect(0, 0, surfaceSize.Width, surfaceSize.Height), new Rect(0, 0, bitmapSize.Width, bitmapSize.Height));
                     }
                 }
             }
         }
 
-        public CompositionDrawingSurface CreateSurface()
+        public CompositionDrawingSurface CreateSurface(Size size)
         {
-            //
-            // We start out with a size of 0,0 for the surface, because we don't know
-            // the size of the image at this time. We resize the surface later.
-            //
-            var surface = _graphicsDevice.CreateDrawingSurface(new Size(0, 0), DirectXPixelFormat.B8G8R8A8UIntNormalized, DirectXAlphaMode.Premultiplied);
+            Size surfaceSize = size;
+            if (surfaceSize.IsEmpty)
+            {
+                //
+                // We start out with a size of 0,0 for the surface, because we don't know
+                // the size of the image at this time. We resize the surface later.
+                //
+                surfaceSize = new Size(0, 0);
+            }
+
+            var surface = _graphicsDevice.CreateDrawingSurface(surfaceSize, DirectXPixelFormat.B8G8R8A8UIntNormalized, DirectXAlphaMode.Premultiplied);
 
             return surface;
         }
 
+        public void ResizeSurface(CompositionDrawingSurface surface, Size size)
+        {
+            if (!size.IsEmpty)
+            {
+                lock (_drawingLock)
+                {
+                    CanvasComposition.Resize(surface, size);
+                }
+            }
+        }
+
         public void Dispose()
         {
-            lock(_deviceLock)
+            lock (_drawingLock)
             {
                 _compositor = null;
                 DisplayInformation.DisplayContentsInvalidated -= OnDisplayContentsInvalidated;

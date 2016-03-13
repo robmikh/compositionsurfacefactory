@@ -14,8 +14,11 @@ namespace Robmikh.Util.CompositionImageLoader
         IImageLoader ImageLoader { get; }
         ICompositionSurface Surface { get; }
         Uri Source { get; }
+        Size Size { get; }
         IAsyncAction RedrawSurface();
         IAsyncAction RedrawSurface(Uri uri);
+        IAsyncAction RedrawSurface(Uri uri, Size size);
+        void Resize(Size size);
     }
 
     class ManagedSurface : IManagedSurface
@@ -48,12 +51,26 @@ namespace Robmikh.Util.CompositionImageLoader
             }
         }
 
-        public ManagedSurface(IImageLoaderInternal imageLoader, Uri uri)
+        public Size Size
         {
-            Debug.WriteLine("CompositionImageLoader - ManagedSurface Created");
+            get
+            {
+                if (_surface != null)
+                {
+                    return _surface.Size;
+                }
+                else
+                {
+                    return Size.Empty;
+                }
+            }
+        }
+
+        public ManagedSurface(IImageLoaderInternal imageLoader, Uri uri, Size size)
+        {
             _imageLoader = imageLoader;
             _uri = uri;
-            _surface = _imageLoader.CreateSurface();
+            _surface = _imageLoader.CreateSurface(size);
 
             _imageLoader.DeviceReplacedEvent += OnDeviceReplaced;
         }
@@ -66,18 +83,28 @@ namespace Robmikh.Util.CompositionImageLoader
 
         public IAsyncAction RedrawSurface()
         {
-            return RedrawSurfaceWorker(_uri).AsAsyncAction();
+            return RedrawSurfaceWorker(_uri, Size.Empty).AsAsyncAction();
         }
 
         public IAsyncAction RedrawSurface(Uri uri)
         {
-            return RedrawSurfaceWorker(uri).AsAsyncAction();
+            return RedrawSurfaceWorker(uri, Size.Empty).AsAsyncAction();
         }
 
-        private async Task RedrawSurfaceWorker(Uri uri)
+        public IAsyncAction RedrawSurface(Uri uri, Size size)
+        {
+            return RedrawSurfaceWorker(uri, size).AsAsyncAction();
+        }
+
+        public void Resize(Size size)
+        {
+            _imageLoader.ResizeSurface(_surface, size);
+        }
+
+        private async Task RedrawSurfaceWorker(Uri uri, Size size)
         {
             _uri = uri;
-            await _imageLoader.DrawSurface(_surface, _uri);
+            await _imageLoader.DrawSurface(_surface, _uri, size);
         }
 
         public void Dispose()
