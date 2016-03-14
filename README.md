@@ -61,7 +61,7 @@ var textSurface= _imageLoader.CreateTextSurface(reallyLongString,       // Text
                                                 WordWrapping.WholeWord, // Wrapping
                                                 new Padding(),          // Padding
                                                 Colors.DarkRed,         // Foreground Color
-                                                Colors,Transparent);    // Background Color
+                                                Colors.Transparent);    // Background Color
 ```
 
 Finally, changing properties on the fly after creation could impact the new size of the surface, so a SurfaceRedrawn event has been exposed. This way you can always make sure your text is displayed correctly:
