@@ -45,7 +45,10 @@ namespace Robmikh.Util.CompositionImageLoader
         CompositionDrawingSurface CreateSurface(Size size);
         void ResizeSurface(CompositionDrawingSurface surface, Size size);
         Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size);
+        void DoWorkUnderLock(LockedWork callback);
     }
+
+    delegate void LockedWork();
 
     public static class ImageLoaderFactory
     {
@@ -303,7 +306,11 @@ namespace Robmikh.Util.CompositionImageLoader
                 surfaceSize = new Size(0, 0);
             }
 
-            var surface = _graphicsDevice.CreateDrawingSurface(surfaceSize, DirectXPixelFormat.B8G8R8A8UIntNormalized, DirectXAlphaMode.Premultiplied);
+            CompositionDrawingSurface surface;
+            lock(_drawingLock)
+            {
+                surface = _graphicsDevice.CreateDrawingSurface(surfaceSize, DirectXPixelFormat.B8G8R8A8UIntNormalized, DirectXAlphaMode.Premultiplied);
+            }
 
             return surface;
         }
@@ -315,6 +322,17 @@ namespace Robmikh.Util.CompositionImageLoader
                 lock (_drawingLock)
                 {
                     CanvasComposition.Resize(surface, size);
+                }
+            }
+        }
+        
+        public void DoWorkUnderLock(LockedWork callback)
+        {
+            if (callback != null)
+            {
+                lock (_drawingLock)
+                {
+                    callback();
                 }
             }
         }

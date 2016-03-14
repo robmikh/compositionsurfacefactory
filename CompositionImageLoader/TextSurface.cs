@@ -320,15 +320,18 @@ namespace Robmikh.Util.CompositionImageLoader
         #region Public Methods
         public void RedrawSurface()
         {
-            float width = (float)(_textLayout.DrawBounds.Left + _textLayout.DrawBounds.Right) + _padding.Left + _padding.Right;
-            float height = (float)(_textLayout.DrawBounds.Top + _textLayout.DrawBounds.Bottom) + _padding.Top + _padding.Bottom;
-            CanvasComposition.Resize(_surface, new Size(width, height));
-
-            using (var session = CanvasComposition.CreateDrawingSession(_surface))
+            _imageLoader.DoWorkUnderLock(() =>
             {
-                session.Clear(_background);
-                session.DrawTextLayout(_textLayout, _padding.Left, _padding.Right, _foreground);
-            }
+                float width = (float)(_textLayout.DrawBounds.Left + _textLayout.DrawBounds.Right) + _padding.Left + _padding.Right;
+                float height = (float)(_textLayout.DrawBounds.Top + _textLayout.DrawBounds.Bottom) + _padding.Top + _padding.Bottom;
+                CanvasComposition.Resize(_surface, new Size(width, height));
+
+                using (var session = CanvasComposition.CreateDrawingSession(_surface))
+                {
+                    session.Clear(_background);
+                    session.DrawTextLayout(_textLayout, _padding.Left, _padding.Right, _foreground);
+                }
+            });
 
             Task.Run(() =>
             {
@@ -396,10 +399,13 @@ namespace Robmikh.Util.CompositionImageLoader
 
         private void UpdateTextLayout()
         {
-            using (var session = CanvasComposition.CreateDrawingSession(_surface))
+            _imageLoader.DoWorkUnderLock(() =>
             {
-                _textLayout = new CanvasTextLayout(session, _text, _textFormat, _width, _height);
-            }
+                using (var session = CanvasComposition.CreateDrawingSession(_surface))
+                {
+                    _textLayout = new CanvasTextLayout(session, _text, _textFormat, _width, _height);
+                }
+            });
         }
 
         private void RaiseSurfaceRedrawnEvent()
