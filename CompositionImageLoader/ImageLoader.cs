@@ -279,7 +279,8 @@ namespace Robmikh.Util.CompositionImageLoader
 
         public async Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size)
         {
-            using (var canvasBitmap = await CanvasBitmap.LoadAsync(_canvasDevice, uri))
+            var canvasDevice = CanvasComposition.GetCanvasDevice(_graphicsDevice);
+            using (var canvasBitmap = await CanvasBitmap.LoadAsync(canvasDevice, uri))
             {
                 var bitmapSize = canvasBitmap.Size;
 
