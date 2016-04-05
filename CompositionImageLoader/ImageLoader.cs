@@ -66,6 +66,13 @@ namespace Robmikh.Util.CompositionImageLoader
             imageLoader.Initialize(graphicsDevice);
             return imageLoader;
         }
+
+        public static IImageLoader CreateImageLoader(CompositionGraphicsDevice graphicsDevice, Object sharedLock)
+        {
+            var imageLoader = new ImageLoader();
+            imageLoader.Initialize(graphicsDevice, sharedLock);
+            return imageLoader;
+        }
     }
 
     class ImageLoader : IImageLoaderInternal
@@ -99,11 +106,18 @@ namespace Robmikh.Util.CompositionImageLoader
             CreateDevice();
         }
 
-        public void Initialize(CompositionGraphicsDevice graphicsDevice)
+        public void Initialize(CompositionGraphicsDevice graphicsDevice, Object sharedLock = null)
         {
             _graphicsDevice = graphicsDevice;
             _graphicsDevice.RenderingDeviceReplaced += RenderingDeviceReplaced;
-            _drawingLock = new object();
+            if (sharedLock == null)
+            {
+                _drawingLock = new object();
+            }
+            else
+            {
+                _drawingLock = sharedLock;
+            }
             _isDeviceCreator = false;
             //
             // We don't call CreateDevice, as it wouldn't do anything
