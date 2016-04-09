@@ -324,6 +324,17 @@ namespace Robmikh.Util.CompositionImageLoader
             {
                 float width = (float)(_textLayout.DrawBounds.Left + _textLayout.DrawBounds.Right) + _padding.Left + _padding.Right;
                 float height = (float)(_textLayout.DrawBounds.Top + _textLayout.DrawBounds.Bottom) + _padding.Top + _padding.Bottom;
+                //
+                // The surface can't have any dimmension be 0, so make it at least 1.0f
+                //
+                if (width < 1.0f)
+                {
+                    width = 1.0f;
+                }
+                if (height < 1.0f)
+                {
+                    height = 1.0f;
+                }
                 CanvasComposition.Resize(_surface, new Size(width, height));
 
                 using (var session = CanvasComposition.CreateDrawingSession(_surface))
