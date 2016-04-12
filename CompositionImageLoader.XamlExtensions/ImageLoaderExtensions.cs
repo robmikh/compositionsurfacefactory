@@ -29,11 +29,6 @@ namespace Robmikh.Util.CompositionImageLoader.XamlExtensions
 
         private static async Task<CompositionDrawingSurface> LoadImageFromUIElementAsyncWorker(IImageLoader imageLoader, UIElement element, Size size)
         {
-            return await DrawUIElement(imageLoader, element, size);
-        }
-
-        private static async Task<CompositionDrawingSurface> DrawUIElement(IImageLoader imageLoader, UIElement element, Size size)
-        {
             var xamlBitmap = new RenderTargetBitmap();
             await xamlBitmap.RenderAsync(element);
             var pixels = await xamlBitmap.GetPixelsAsync();

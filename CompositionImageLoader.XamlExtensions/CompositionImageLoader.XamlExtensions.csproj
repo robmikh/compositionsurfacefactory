@@ -111,12 +111,6 @@
     <Compile Include="ImageLoaderExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CompositionImageLoader\CompositionImageLoader.csproj">
-      <Project>{ad0e6e4b-452b-47c3-94ac-c7bc0068c61b}</Project>
-      <Name>CompositionImageLoader</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
