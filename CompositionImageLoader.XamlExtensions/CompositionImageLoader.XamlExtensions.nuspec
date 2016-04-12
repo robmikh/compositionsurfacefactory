@@ -14,7 +14,7 @@
     <releaseNotes>Initial release.</releaseNotes>
     <copyright>Copyright 2016</copyright>
 	<dependencies>
-		<dependency id="" version="" />
+		<dependency id="Robmikh.Util.CompositionImageLoader" version="0.4.0-alpha" />
         <dependency id="Win2D.uwp" version="1.16.0" />
     </dependencies>
   </metadata>
