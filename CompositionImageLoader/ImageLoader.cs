@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -38,6 +39,8 @@ namespace Robmikh.Util.CompositionImageLoader
                                        Padding padding,
                                        Color foreground,
                                        Color background);
+        CompositionDrawingSurface LoadImageFromBytes([ReadOnlyArray()] byte[] bytes, int widthInPixels, int heightInPixels);
+        CompositionDrawingSurface LoadImageFromBytes([ReadOnlyArray()] byte[] bytes, int widthInPixels, int heightInPixels, Size size);
     }
 
     interface IImageLoaderInternal : IImageLoader
@@ -277,34 +280,62 @@ namespace Robmikh.Util.CompositionImageLoader
             return textSurface;
         }
 
+        public CompositionDrawingSurface LoadImageFromBytes(byte[] bytes, int widthInPixels, int heightInPixels)
+        {
+            return LoadImageFromBytes(bytes, widthInPixels, heightInPixels, Size.Empty);
+        }
+
+        public CompositionDrawingSurface LoadImageFromBytes(byte[] bytes, int widthInPixels, int heightInPixels, Size size)
+        {
+            var surface = CreateSurface(size);
+
+            DrawBytes(surface, bytes, widthInPixels, heightInPixels, size);
+
+            return surface;
+        }
+
         public async Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size)
         {
             var canvasDevice = CanvasComposition.GetCanvasDevice(_graphicsDevice);
             using (var canvasBitmap = await CanvasBitmap.LoadAsync(canvasDevice, uri))
             {
-                var bitmapSize = canvasBitmap.Size;
+                DrawBitmap(surface, canvasBitmap, size);
+            }
+        }
 
-                //
-                // Because the drawing is done asynchronously and multiple threads could
-                // be trying to get access to the device/surface at the same time, we need
-                // to do any device/surface work under a lock.
-                //
-                lock (_drawingLock)
+        public void DrawBytes(CompositionDrawingSurface surface, byte[] bytes, int widthInPixels, int heightInPixels, Size size)
+        {
+            var canvasDevice = CanvasComposition.GetCanvasDevice(_graphicsDevice);
+            using (var canvasBitmap = CanvasBitmap.CreateFromBytes(canvasDevice, bytes, widthInPixels, heightInPixels, DirectXPixelFormat.B8G8R8A8UIntNormalized))
+            {
+                DrawBitmap(surface, canvasBitmap, size);
+            }
+        }
+
+        public void DrawBitmap(CompositionDrawingSurface surface, CanvasBitmap canvasBitmap, Size size)
+        {
+            var bitmapSize = canvasBitmap.Size;
+
+            //
+            // Because the drawing is done asynchronously and multiple threads could
+            // be trying to get access to the device/surface at the same time, we need
+            // to do any device/surface work under a lock.
+            //
+            lock (_drawingLock)
+            {
+                Size surfaceSize = size;
+                if (surfaceSize.IsEmpty)
                 {
-                    Size surfaceSize = size;
-                    if (surfaceSize.IsEmpty)
-                    {
-                        // Resize the surface to the size of the image
-                        CanvasComposition.Resize(surface, bitmapSize);
-                        surfaceSize = bitmapSize;
-                    }
+                    // Resize the surface to the size of the image
+                    CanvasComposition.Resize(surface, bitmapSize);
+                    surfaceSize = bitmapSize;
+                }
 
-                    // Draw the image to the surface
-                    using (var session = CanvasComposition.CreateDrawingSession(surface))
-                    {
-                        session.Clear(Windows.UI.Color.FromArgb(0, 0, 0, 0));
-                        session.DrawImage(canvasBitmap, new Rect(0, 0, surfaceSize.Width, surfaceSize.Height), new Rect(0, 0, bitmapSize.Width, bitmapSize.Height));
-                    }
+                // Draw the image to the surface
+                using (var session = CanvasComposition.CreateDrawingSession(surface))
+                {
+                    session.Clear(Color.FromArgb(0, 0, 0, 0));
+                    session.DrawImage(canvasBitmap, new Rect(0, 0, surfaceSize.Width, surfaceSize.Height), new Rect(0, 0, bitmapSize.Width, bitmapSize.Height));
                 }
             }
         }

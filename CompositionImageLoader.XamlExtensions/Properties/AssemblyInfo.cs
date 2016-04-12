@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CompositionImageLoader")]
-[assembly: AssemblyDescription("An image loader to use with the Windows.UI.Composition api based on Win2D and written with C#.")]
+[assembly: AssemblyTitle("CompositionImageLoader.XamlExtensions")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Robert Mikhayelyan")]
-[assembly: AssemblyProduct("CompositionImageLoader")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("CompositionImageLoader.XamlExtensions")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -24,7 +24,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.0")]
-[assembly: AssemblyInformationalVersion("0.4.0-alpha")]
-[assembly: AssemblyFileVersion("0.4.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: ComVisible(false)]
