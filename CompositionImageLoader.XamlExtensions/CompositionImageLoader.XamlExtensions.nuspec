@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/robmikh/compositionimageloader</projectUrl>
+    <iconUrl>http://robmikh.com/compimageloader.png</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+	<dependencies>
+		<dependency id="" version="" />
+        <dependency id="Win2D.uwp" version="1.16.0" />
+    </dependencies>
+  </metadata>
+</package>
