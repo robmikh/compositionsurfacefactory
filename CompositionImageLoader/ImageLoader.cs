@@ -41,11 +41,14 @@ namespace Robmikh.Util.CompositionImageLoader
                                        Color background);
         CompositionDrawingSurface LoadImageFromBytes([ReadOnlyArray()] byte[] bytes, int widthInPixels, int heightInPixels);
         CompositionDrawingSurface LoadImageFromBytes([ReadOnlyArray()] byte[] bytes, int widthInPixels, int heightInPixels, Size size);
+        CompositionDrawingSurface CreateSurface(Size size);
+        void DrawIntoSurface(CompositionDrawingSurface surface, DrawCallback callback);
     }
+
+    public delegate void DrawCallback(CompositionDrawingSurface surface, CompositionGraphicsDevice device);
 
     interface IImageLoaderInternal : IImageLoader
     {
-        CompositionDrawingSurface CreateSurface(Size size);
         void ResizeSurface(CompositionDrawingSurface surface, Size size);
         Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size);
         void DoWorkUnderLock(LockedWork callback);
@@ -292,6 +295,19 @@ namespace Robmikh.Util.CompositionImageLoader
             DrawBytes(surface, bytes, widthInPixels, heightInPixels, size);
 
             return surface;
+        }
+
+        public void DrawIntoSurface(CompositionDrawingSurface surface, DrawCallback callback)
+        {
+            if (surface.Compositor != _graphicsDevice.Compositor)
+            {
+                throw new ArgumentException("Surface belongs to a different Compositor.");
+            }
+
+            lock(_drawingLock)
+            {
+                callback.Invoke(surface, _graphicsDevice);
+            }
         }
 
         public async Task DrawSurface(CompositionDrawingSurface surface, Uri uri, Size size)
