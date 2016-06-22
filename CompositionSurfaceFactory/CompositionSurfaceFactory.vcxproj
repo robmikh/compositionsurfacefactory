@@ -207,6 +207,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="SurfaceFactoryOptions.h" />
     <ClInclude Include="UriSurface.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SharedLock.h" />

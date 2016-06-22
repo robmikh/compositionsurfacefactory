@@ -20,6 +20,7 @@
     <ClInclude Include="TextSurface.h" />
     <ClInclude Include="TextSurfaceEnums.h" />
     <ClInclude Include="UriSurface.h" />
+    <ClInclude Include="SurfaceFactoryOptions.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

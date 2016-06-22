@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "SurfaceFactoryOptions.h"
 #include "TextSurfaceEnums.h"
 
 namespace Robmikh
@@ -10,12 +11,15 @@ namespace CompositionSurfaceFactory
     ref class UriSurface;
     ref class TextSurface;
     value struct Padding;
+    value struct SurfaceFactoryOptions;
 
     [Windows::Foundation::Metadata::WebHostHiddenAttribute]
     public ref class SurfaceFactory sealed
     {
     public:
+        [Windows::Foundation::Metadata::DefaultOverloadAttribute]
         static SurfaceFactory^ CreateFromCompositor(Compositor^ compositor);
+        static SurfaceFactory^ CreateFromCompositor(Compositor^ compositor, SurfaceFactoryOptions options);
         [Windows::Foundation::Metadata::DefaultOverloadAttribute]
         static SurfaceFactory^ CreateFromGraphicsDevice(CompositionGraphicsDevice^ graphicsDevice);
         static SurfaceFactory^ CreateFromGraphicsDevice(CompositionGraphicsDevice^ graphicsDevice, SharedLock^ lock);
@@ -57,7 +61,7 @@ namespace CompositionSurfaceFactory
 
         virtual ~SurfaceFactory();
     private:
-        SurfaceFactory(WUC::Compositor^ compositor);
+        SurfaceFactory(WUC::Compositor^ compositor, SurfaceFactoryOptions options);
         SurfaceFactory(CompositionGraphicsDevice^ graphicsDevice, SharedLock^ lock);
 
         void Uninitialize();
@@ -66,7 +70,7 @@ namespace CompositionSurfaceFactory
         void OnRenderingDeviceReplaced(Windows::UI::Composition::CompositionGraphicsDevice ^sender, Windows::UI::Composition::RenderingDeviceReplacedEventArgs ^args);
         void OnDeviceLost(Microsoft::Graphics::Canvas::CanvasDevice ^sender, Platform::Object ^args);
 
-        void CreateDevice();
+        void CreateDevice(SurfaceFactoryOptions options);
         void RaiseDeviceReplacedEvent(RenderingDeviceReplacedEventArgs ^args);     
         void DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap^ canvasBitmap, Size size);
     internal:
@@ -79,7 +83,8 @@ namespace CompositionSurfaceFactory
         CanvasDevice^ m_canvasDevice;
         CompositionGraphicsDevice^ m_graphicsDevice;
         SharedLock^ m_drawingLock;
-        bool m_isDeviceCreator;
+        bool m_isCanvasDeviceCreator;
+        bool m_isGraphicsDeviceCreator;
 
         EventRegistrationToken OnDeviceLostHandler;
         EventRegistrationToken OnRenderingDeviceReplacedHandler;

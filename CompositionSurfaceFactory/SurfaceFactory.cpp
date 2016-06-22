@@ -3,6 +3,7 @@
 #include "SharedLock.h"
 #include "UriSurface.h"
 #include "TextSurface.h"
+#include "SurfaceFactoryOptions.h"
 
 using namespace Robmikh::CompositionSurfaceFactory;
 using namespace Platform;
@@ -12,7 +13,16 @@ namespace CSF = Robmikh::CompositionSurfaceFactory;
 
 SurfaceFactory^ SurfaceFactory::CreateFromCompositor(WUC::Compositor^ compositor)
 {
-    auto surfaceFactory = ref new SurfaceFactory(compositor);
+    auto options = SurfaceFactoryOptions();
+    options.CreateNewDevice = false;
+
+    auto surfaceFactory = ref new SurfaceFactory(compositor, options);
+    return surfaceFactory;
+}
+
+SurfaceFactory^ SurfaceFactory::CreateFromCompositor(WUC::Compositor^ compositor, SurfaceFactoryOptions options)
+{
+    auto surfaceFactory = ref new SurfaceFactory(compositor, options);
     return surfaceFactory;
 }
 
@@ -28,21 +38,23 @@ SurfaceFactory^ SurfaceFactory::CreateFromGraphicsDevice(CompositionGraphicsDevi
     return surfaceFactory;
 }
 
-SurfaceFactory::SurfaceFactory(WUC::Compositor^ compositor)
+SurfaceFactory::SurfaceFactory(WUC::Compositor^ compositor, SurfaceFactoryOptions options)
 {
     m_compositor = compositor;
     m_drawingLock = ref new SharedLock();
-    m_isDeviceCreator = true;
+    m_isCanvasDeviceCreator = options.CreateNewDevice;
+    m_isGraphicsDeviceCreator = true;
     OnDeviceLostHandler = DisplayInformation::DisplayContentsInvalidated 
         += ref new TypedEventHandler<DisplayInformation ^, Object ^>(this, &SurfaceFactory::OnDisplayContentsInvalidated);
-    CreateDevice();
+    CreateDevice(options);
 }
 
 SurfaceFactory::SurfaceFactory(CompositionGraphicsDevice^ graphicsDevice, SharedLock^ lock)
 {
     m_compositor = graphicsDevice->Compositor;
     m_graphicsDevice = graphicsDevice;
-    m_isDeviceCreator = false;
+    m_isCanvasDeviceCreator = false;
+    m_isGraphicsDeviceCreator = false;
     if (lock == nullptr)
     {
         m_drawingLock = ref new SharedLock();
@@ -65,7 +77,7 @@ void SurfaceFactory::OnDisplayContentsInvalidated(DisplayInformation ^sender, Ob
 {
     OutputDebugString(L"CompositionSurfaceFactory - Display Contents Invalidated");
     // This will trigger the device lost event
-    CanvasDevice::GetSharedDevice();
+    m_canvasDevice->RaiseDeviceLost();
 }
 
 void SurfaceFactory::OnRenderingDeviceReplaced(CompositionGraphicsDevice ^sender, RenderingDeviceReplacedEventArgs ^args)
@@ -82,13 +94,20 @@ void SurfaceFactory::RaiseDeviceReplacedEvent(RenderingDeviceReplacedEventArgs ^
     DeviceReplaced(this, args);
 }
 
-void SurfaceFactory::CreateDevice()
+void SurfaceFactory::CreateDevice(SurfaceFactoryOptions options)
 {
-    if (m_compositor != nullptr && m_isDeviceCreator)
+    if (m_compositor != nullptr && m_isGraphicsDeviceCreator)
     {
         if (m_canvasDevice == nullptr)
         {
-            m_canvasDevice = CanvasDevice::GetSharedDevice();
+            if (m_isCanvasDeviceCreator)
+            {
+                m_canvasDevice = ref new CanvasDevice(options.UseSoftwareRenderer);
+            }
+            else
+            {
+                m_canvasDevice = CanvasDevice::GetSharedDevice();
+            }
             OnDeviceLostHandler = m_canvasDevice->DeviceLost
                 += ref new TypedEventHandler<CanvasDevice ^, Object ^>(this, &SurfaceFactory::OnDeviceLost);
         }
@@ -107,7 +126,14 @@ void SurfaceFactory::OnDeviceLost(CanvasDevice ^sender, Object ^args)
     OutputDebugString(L"CompositionSurfaceFactory - Canvas Device Lost");
     sender->DeviceLost -= OnDeviceLostHandler;
 
-    m_canvasDevice = CanvasDevice::GetSharedDevice();
+    if (m_isCanvasDeviceCreator)
+    {
+        m_canvasDevice = ref new CanvasDevice(sender->ForceSoftwareRenderer);
+    }
+    else
+    {
+        m_canvasDevice = CanvasDevice::GetSharedDevice();
+    }
     OnDeviceLostHandler = m_canvasDevice->DeviceLost
         += ref new TypedEventHandler<CanvasDevice ^, Object ^>(this, &SurfaceFactory::OnDeviceLost);
 
@@ -310,7 +336,7 @@ void SurfaceFactory::Uninitialize()
         {
             m_canvasDevice->DeviceLost -= OnDeviceLostHandler;
             // Only dispose the canvas device if we own the device.
-            if (m_isDeviceCreator)
+            if (m_isCanvasDeviceCreator)
             {
                 m_canvasDevice->~CanvasDevice();
             }
@@ -321,7 +347,7 @@ void SurfaceFactory::Uninitialize()
         {
             m_graphicsDevice->RenderingDeviceReplaced -= OnRenderingDeviceReplacedHandler;
             // Only dispose the composition graphics device if we own the device.
-            if (m_isDeviceCreator)
+            if (m_isGraphicsDeviceCreator)
             {
                 m_graphicsDevice->~CompositionGraphicsDevice();
             }
