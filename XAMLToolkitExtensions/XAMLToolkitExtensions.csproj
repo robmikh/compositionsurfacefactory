@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A5526B4B-224F-407F-A3FA-746D1126B4B0}</ProjectGuid>
+    <ProjectGuid>{C6A8F5B5-97D0-4CBF-8F44-8A037E89D313}</ProjectGuid>
     <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Robmikh.Util.CompositionImageLoader.XamlExtensions</RootNamespace>
-    <AssemblyName>CompositionImageLoader.XamlExtensions</AssemblyName>
+    <RootNamespace>Robmikh.CompositionSurfaceFactory.CompositionToolkit.XAMLToolkit.Extensions</RootNamespace>
+    <AssemblyName>XAMLToolkitExtensions</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
@@ -108,8 +108,16 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ImageLoaderExtensions.cs" />
+    <Compile Include="SurfaceFactoryExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Robmikh.CompositionSurfaceFactory">
+      <HintPath>..\Debug\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.winmd</HintPath>
+    </Reference>
+    <Reference Include="Robmikh.CompositionSurfaceFactory.CompositionToolkit.XAMLToolkit">
+      <HintPath>..\Debug\XAMLToolkit\Robmikh.CompositionSurfaceFactory.CompositionToolkit.XAMLToolkit.winmd</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
@@ -122,16 +130,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <!-- MSBuildTasks nuget is currently hosed for UWP
-  <PropertyGroup>
-    <MSBuildCommunityTasksPath>$(SolutionDir)\.build</MSBuildCommunityTasksPath>
-  </PropertyGroup>
-  <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets" />
-  -->
-  <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
-    <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
-    <!--<WebDownload Condition="!Exists('nuget.exe')" Filename="nuget.exe" FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" /> -->
-    <Exec Command="nuget pack CompositionImageLoader.XamlExtensions.csproj -IncludeReferencedProjects -Prop Configuration=Release">
-    </Exec>
-  </Target>
 </Project>
