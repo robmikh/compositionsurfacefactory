@@ -222,10 +222,9 @@
     <ClCompile Include="SurfaceFactoryHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Robmikh.CompositionSurfaceFactory">
-      <HintPath>..\Debug\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.winmd</HintPath>
-      <IsWinMDFile>true</IsWinMDFile>
-    </Reference>
+    <ProjectReference Include="..\CompositionSurfaceFactory\CompositionSurfaceFactory.vcxproj">
+      <Project>{456af98d-0972-448f-995a-db91908b7795}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

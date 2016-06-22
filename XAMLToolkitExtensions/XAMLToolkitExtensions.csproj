@@ -112,12 +112,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Robmikh.CompositionSurfaceFactory">
-      <HintPath>..\Debug\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.winmd</HintPath>
-    </Reference>
-    <Reference Include="Robmikh.CompositionSurfaceFactory.CompositionToolkit.XAMLToolkit">
-      <HintPath>..\Debug\XAMLToolkit\Robmikh.CompositionSurfaceFactory.CompositionToolkit.XAMLToolkit.winmd</HintPath>
-    </Reference>
+    <ProjectReference Include="..\CompositionSurfaceFactory\CompositionSurfaceFactory.vcxproj">
+      <Project>{456af98d-0972-448f-995a-db91908b7795}</Project>
+      <Name>CompositionSurfaceFactory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XAMLToolkit\XAMLToolkit.vcxproj">
+      <Project>{4b4f1601-a998-497e-ab34-2b8467e27a35}</Project>
+      <Name>XAMLToolkit</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
