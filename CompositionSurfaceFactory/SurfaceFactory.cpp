@@ -147,10 +147,15 @@ CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromUri(Uri^ uri)
 
 CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromUri(Uri^ uri, Size size)
 {
+    return CreateSurfaceFromUri(uri, size, InterpolationMode::Linear);
+}
+
+CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromUri(Uri^ uri, Size size, InterpolationMode interpolation)
+{
     auto surface = CreateSurface(size);
 
     // We don't await this call, as we don't want to block the caller
-    auto ignored = DrawSurface(surface, uri, size);
+    auto ignored = DrawSurface(surface, uri, size, interpolation);
 
     return surface;
 }
@@ -162,11 +167,16 @@ IAsyncOperation<CompositionDrawingSurface^>^ SurfaceFactory::CreateSurfaceFromUr
 
 IAsyncOperation<CompositionDrawingSurface^>^ SurfaceFactory::CreateSurfaceFromUriAsync(Uri^ uri, Size size)
 {
+    return CreateSurfaceFromUriAsync(uri, size, InterpolationMode::Linear);
+}
+
+IAsyncOperation<CompositionDrawingSurface^>^ SurfaceFactory::CreateSurfaceFromUriAsync(Uri^ uri, Size size, InterpolationMode interpolation)
+{
     return concurrency::create_async([=]() -> CompositionDrawingSurface^
     {
         auto surface = CreateSurface(size);
 
-        auto drawTask = DrawSurface(surface, uri, size).then([surface]()
+        auto drawTask = DrawSurface(surface, uri, size, interpolation).then([surface]()
         {
             return surface;
         });
@@ -198,14 +208,14 @@ CompositionDrawingSurface^ SurfaceFactory::CreateSurface(Size size)
     return surface;
 }
 
-concurrency::task<void> SurfaceFactory::DrawSurface(CompositionDrawingSurface^ surface, Uri^ uri, Size size) __resumable
+concurrency::task<void> SurfaceFactory::DrawSurface(CompositionDrawingSurface^ surface, Uri^ uri, Size size, InterpolationMode interpolation) __resumable
 {
     auto canvasDevice = CanvasComposition::GetCanvasDevice(m_graphicsDevice);
-    auto canvasBitmap = __await CanvasBitmap::LoadAsync(canvasDevice, uri);
-    DrawBitmap(surface, canvasBitmap, size);
+    auto canvasBitmap = co_await CanvasBitmap::LoadAsync(canvasDevice, uri);
+    DrawBitmap(surface, canvasBitmap, size, interpolation);
 }
 
-void SurfaceFactory::DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap^ canvasBitmap, Size size)
+void SurfaceFactory::DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap^ canvasBitmap, Size size, InterpolationMode interpolation)
 {
     auto bitmapSize = canvasBitmap->Size;
 
@@ -225,8 +235,9 @@ void SurfaceFactory::DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap
         auto session = CanvasComposition::CreateDrawingSession(surface);
         Rect surfaceRect = { 0, 0, surfaceSize.Width, surfaceSize.Height };
         Rect bitmapRect = { 0, 0, bitmapSize.Width, bitmapSize.Height };
+        CanvasImageInterpolation canvasInterpolation = InterpolationModeHelper::GetCanvasImageInterpolation(interpolation);
         session->Clear(Windows::UI::Colors::Transparent);
-        session->DrawImage(canvasBitmap, surfaceRect, bitmapRect);
+        session->DrawImage(canvasBitmap, surfaceRect, bitmapRect, 1.0f, canvasInterpolation);
     }));
 }
 
@@ -245,7 +256,12 @@ UriSurface^ SurfaceFactory::CreateUriSurface(Uri^ uri)
 
 UriSurface^ SurfaceFactory::CreateUriSurface(Uri^ uri, Size size)
 {
-    auto uriSurface = UriSurface::Create(this, uri, size);
+    return CreateUriSurface(uri, size, InterpolationMode::Linear);
+}
+
+UriSurface^ SurfaceFactory::CreateUriSurface(Uri^ uri, Size size, InterpolationMode interpolation)
+{
+    auto uriSurface = UriSurface::Create(this, uri, size, interpolation);
     auto ignored = uriSurface->RedrawSurface();
 
     return uriSurface;
@@ -258,9 +274,14 @@ IAsyncOperation<UriSurface^>^ SurfaceFactory::CreateUriSurfaceAsync(Uri^ uri)
 
 IAsyncOperation<UriSurface^>^ SurfaceFactory::CreateUriSurfaceAsync(Uri^ uri, Size size)
 {
+    return CreateUriSurfaceAsync(uri, size, InterpolationMode::Linear);
+}
+
+IAsyncOperation<UriSurface^>^ SurfaceFactory::CreateUriSurfaceAsync(Uri^ uri, Size size, InterpolationMode interpolation)
+{
     return concurrency::create_async([=]() -> UriSurface^
     {
-        auto uriSurface = UriSurface::Create(this, uri, size);
+        auto uriSurface = UriSurface::Create(this, uri, size, interpolation);
 
         auto drawTask = concurrency::create_task(uriSurface->RedrawSurface()).then([uriSurface]() -> UriSurface^
         {
@@ -317,11 +338,16 @@ CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromBytes(const Array<by
 
 CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromBytes(const Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size)
 {
+    return CreateSurfaceFromBytes(bytes, widthInPixels, heightInPixels, size, InterpolationMode::Linear);
+}
+
+CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromBytes(const Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size, InterpolationMode interpolation)
+{
     auto surface = CreateSurface(size);
 
     auto canvasDevice = CanvasComposition::GetCanvasDevice(m_graphicsDevice);
     auto canvasBitmap = CanvasBitmap::CreateFromBytes(canvasDevice, bytes, widthInPixels, heightInPixels, Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized);
-    DrawBitmap(surface, canvasBitmap, size);
+    DrawBitmap(surface, canvasBitmap, size, interpolation);
 
     return surface;
 }

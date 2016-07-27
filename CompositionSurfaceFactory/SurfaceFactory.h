@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "SurfaceFactoryOptions.h"
 #include "TextSurfaceEnums.h"
+#include "ImageEnums.h"
 
 namespace Robmikh
 {
@@ -32,18 +33,23 @@ namespace CompositionSurfaceFactory
 
         CompositionDrawingSurface^ CreateSurfaceFromUri(Uri^ uri);
         CompositionDrawingSurface^ CreateSurfaceFromUri(Uri^ uri, Size size);
+        CompositionDrawingSurface^ CreateSurfaceFromUri(Uri^ uri, Size size, InterpolationMode interpolation);
 
         IAsyncOperation<CompositionDrawingSurface^>^ CreateSurfaceFromUriAsync(Uri^ uri);
         IAsyncOperation<CompositionDrawingSurface^>^ CreateSurfaceFromUriAsync(Uri^ uri, Size size);
+        IAsyncOperation<CompositionDrawingSurface^>^ CreateSurfaceFromUriAsync(Uri^ uri, Size size, InterpolationMode interpolation);
 
         CompositionDrawingSurface^ CreateSurfaceFromBytes(const Platform::Array<byte>^ bytes, int widthInPixels, int heightInPixels);
         CompositionDrawingSurface^ CreateSurfaceFromBytes(const Platform::Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size);
+        CompositionDrawingSurface^ CreateSurfaceFromBytes(const Platform::Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size, InterpolationMode interpolation);
 
         UriSurface^ CreateUriSurface(Uri^ uri);
         UriSurface^ CreateUriSurface(Uri^ uri, Size size);
+        UriSurface^ CreateUriSurface(Uri^ uri, Size size, InterpolationMode interpolation);
 
         IAsyncOperation<UriSurface^>^ CreateUriSurfaceAsync(Uri^ uri);
         IAsyncOperation<UriSurface^>^ CreateUriSurfaceAsync(Uri^ uri, Size size);
+        IAsyncOperation<UriSurface^>^ CreateUriSurfaceAsync(Uri^ uri, Size size, InterpolationMode interpolation);
 
         TextSurface^ CreateTextSurface(Platform::String^ text);
         TextSurface^ CreateTextSurface(Platform::String^ text,
@@ -72,9 +78,9 @@ namespace CompositionSurfaceFactory
 
         void CreateDevice(SurfaceFactoryOptions options);
         void RaiseDeviceReplacedEvent(RenderingDeviceReplacedEventArgs ^args);     
-        void DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap^ canvasBitmap, Size size);
+        void DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap^ canvasBitmap, Size size, InterpolationMode interpolation);
     internal:
-        concurrency::task<void> DrawSurface(CompositionDrawingSurface^ surface, Uri^ uri, Size size) __resumable;
+        concurrency::task<void> DrawSurface(CompositionDrawingSurface^ surface, Uri^ uri, Size size, InterpolationMode interpolation) __resumable;
         void ResizeSurface(CompositionDrawingSurface^ surface, Size size);
     public:
         event EventHandler<RenderingDeviceReplacedEventArgs^>^ DeviceReplaced;

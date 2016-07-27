@@ -11,19 +11,23 @@ namespace CSF = Robmikh::CompositionSurfaceFactory;
 UriSurface^ UriSurface::Create(
     CSF::SurfaceFactory^ surfaceFactory,
     Uri^ uri,
-    WF::Size size)
+    WF::Size size,
+    CSF::InterpolationMode interpolation)
 {
-    return ref new UriSurface(surfaceFactory, uri, size);
+    return ref new UriSurface(surfaceFactory, uri, size, interpolation);
 }
 
 UriSurface::UriSurface(
     CSF::SurfaceFactory^ surfaceFactory,
     Uri^ uri, 
-    WF::Size size) : 
+    WF::Size size,
+    CSF::InterpolationMode interpolation) : 
     m_surfaceFactory(surfaceFactory), 
-    m_uri(uri)
+    m_uri(uri),
+    m_interpolationMode(interpolation),
+    m_desiredSize(size)
 {
-    m_surface = m_surfaceFactory->CreateSurface(size);
+    m_surface = m_surfaceFactory->CreateSurface(m_desiredSize);
 
     OnDeviceReplacedHandler = 
         m_surfaceFactory->DeviceReplaced += 
@@ -43,25 +47,25 @@ void UriSurface::OnDeviceReplacedEvent(Object ^sender, RenderingDeviceReplacedEv
 
 IAsyncAction^ UriSurface::RedrawSurface()
 {
-    return concurrency::create_async([this]() -> concurrency::task<void>
-    {
-        return RedrawSurfaceWorker(m_uri, WF::Size::Empty);
-    });
+    return RedrawSurface(m_uri);
 }
 
 IAsyncAction^ UriSurface::RedrawSurface(Uri^ uri)
 {
-    return concurrency::create_async([this, uri]() -> concurrency::task<void>
-    {
-        return RedrawSurfaceWorker(uri, WF::Size::Empty);
-    });
+    return RedrawSurface(uri, m_desiredSize);
 }
 
 IAsyncAction^ UriSurface::RedrawSurface(Uri^ uri, WF::Size size)
 {
-    return concurrency::create_async([this, uri, size]() -> concurrency::task<void>
+    return RedrawSurface(uri, size, m_interpolationMode);
+}
+
+IAsyncAction^ UriSurface::RedrawSurface(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation)
+{
+    m_desiredSize = size;
+    return concurrency::create_async([this, uri, size, interpolation]() -> concurrency::task<void>
     {
-        return RedrawSurfaceWorker(uri, size);
+        return RedrawSurfaceWorker(uri, size, interpolation);
     });
 }
 
@@ -75,10 +79,11 @@ void UriSurface::Resize(WF::Size size)
     }));
 }
 
-concurrency::task<void> UriSurface::RedrawSurfaceWorker(Uri^ uri, WF::Size size) __resumable
+concurrency::task<void> UriSurface::RedrawSurfaceWorker(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation) __resumable
 {
     m_uri = uri;
-    __await m_surfaceFactory->DrawSurface(m_surface, m_uri, size);
+    m_interpolationMode = interpolation;
+    co_await m_surfaceFactory->DrawSurface(m_surface, m_uri, size, m_interpolationMode);
 }
 
 void UriSurface::Uninitialize()

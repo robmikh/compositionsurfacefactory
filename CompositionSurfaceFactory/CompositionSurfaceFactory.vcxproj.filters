@@ -21,6 +21,7 @@
     <ClInclude Include="TextSurfaceEnums.h" />
     <ClInclude Include="UriSurface.h" />
     <ClInclude Include="SurfaceFactoryOptions.h" />
+    <ClInclude Include="ImageEnums.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
