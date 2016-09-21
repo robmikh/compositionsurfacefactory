@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package >
+  <metadata minClientVersion="2.5">
+    <id>Robmikh.CompositionSurfaceFactory</id>
+    <version>0.0.0-SpecifyVersionOnCommandline</version>
+    <title>Robmikh.CompositionSurfaceFactory</title>
+    <authors>Robert Mikhayelyan</authors>
+    <owners>Robert Mikhayelyan</owners>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/robmikh/compositionsurfacefactory</projectUrl>
+    <iconUrl>http://robmikh.com/compimageloader.png</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>CompositionSurfaceFactory (formerly known as CompositionImageLoader) is a surface factory intended for use with the Windows.UI.Composition API based on Win2D and written in C++/CX. Don't worry, image loading still comes out of the box!</description>
+    <releaseNotes>[PLEASE REPLACE BEFORE PUBLISHING]</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+	  <dependencies>
+        <dependency id="Win2D.uwp" version="1.19.0" />
+    </dependencies>
+  </metadata>
+  <files>
+      <file target="build\native\Robmikh.CompositionSurfaceFactory.targets" src="CompositionSurfaceFactory.targets" />
+      <file target="build\native\Robmikh.CompositionSurfaceFactory.props" src="CompositionSurfaceFactory.props" />
+
+      <file target="lib\uap10.0" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.winmd" />
+      <file target="lib\uap10.0\Robmikh.CompositionSurfaceFactory.xml" src="Release\CompositionSurfaceFactory\CompositionSurfaceFactory.xml" />
+
+      <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.dll" src="ARM\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
+      <file target="runtimes\win10-arm\native" src="ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
+
+      <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.dll" src="Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
+      <file target="runtimes\win10-x86\native" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
+
+      <file target="runtimes\win10-x64\native\Robmikh.CompositionSurfaceFactory.dll" src="x64\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
+      <file target="runtimes\win10-x64\native" src="x64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
+  </files>
+</package>
