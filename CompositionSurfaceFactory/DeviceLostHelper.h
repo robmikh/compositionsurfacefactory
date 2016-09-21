@@ -25,6 +25,11 @@ namespace CompositionSurfaceFactory
 	public ref class DeviceLostHelper sealed
 	{
 	public:
+		property IDirect3DDevice^ CurrentlyWatchedDevice
+		{
+			IDirect3DDevice^ get() { return m_device; }
+		}
+
 		DeviceLostHelper();
 
 		void WatchDevice(IDirect3DDevice^ device);
