@@ -2,13 +2,11 @@
 CompositionSurfaceFactory (formerly known as CompositionImageLoader) is a surface factory intended for use with the Windows.UI.Composition api based on Win2D and written in C++/CX. Don't worry, image loading still comes out of the box!
 
 ## Nuget Package
-~~You can download the latest nuget package for CompositionImageLoader using this command:~~
+You can download the latest nuget package for CompositionImageLoader using this command:
 ```
-PM>  Install-Package Robmikh.Util.CompositionImageLoader -Pre // Old package
+PM>  Install-Package Robmikh.CompositionSurfaceFactory -Pre
 ```
-~~Learn more [here](https://www.nuget.org/packages/Robmikh.Util.CompositionImageLoader).~~
-
-Looks like I'll have to create a new nuget package since I've changed the name/namespace.
+Learn more [here](https://www.nuget.org/packages/Robmikh.CompositionSurfaceFactory).
 
 ## Usage
 Loading images into a surface is easy using CompositionSurfaceFactory:
@@ -83,4 +81,4 @@ Just like with UriSurface, don't forget to dispose of TextSurface when you're do
 ### Device Lost and Device Lifetime
 A device lost event is exposed to the caller through the SurfaceFactory. When notified of a device lost, the caller should ask the SurfaceFactory to redraw any needed surfaces. UriSurface and TextSurface will do this for you if used.
 
-When the SurfaceFactory is created with only a Compositor, it will use the shared Win2D device (from `CanvasDevice.GetSharedDevice()`). In this case, the SurfaceFactory will not dispose of the device when it is disposed. When the SurfaceFactory is created with a `SurfaceFactoryOptions` struct where `CreateNewDevice` is true, then it will create a new device itself. As such, the SurfaceFactory will be responsible for device lifetime, which includes creating and disposing of the device. Alternatively, if a CompositoinGraphicsDevice is given to the SurfaceFactory instead, then the caller is responsible for the device's lifetime.
+When the SurfaceFactory is created with only a Compositor, it will create a new `CanvasDevice`. As such, the SurfaceFactory will be responsible for device lifetime, which includes creating and disposing of the device. Alternatively, if a CompositoinGraphicsDevice is given to the SurfaceFactory instead, then the caller is responsible for the device's lifetime.
