@@ -248,7 +248,7 @@ namespace CompositionSurfaceFactory
         Windows::UI::Color m_backgroundColor;
         CanvasTextLayout^ m_textLayout;
 
-        EventRegistrationToken OnDeviceReplacedHandler;
+		Windows::Foundation::EventRegistrationToken OnDeviceReplacedHandler;
     };
 }
 }

@@ -51,7 +51,7 @@ namespace CompositionSurfaceFactory
         CompositionSurfaceFactory::InterpolationMode m_interpolationMode;
         WF::Size m_desiredSize;
 
-        EventRegistrationToken OnDeviceReplacedHandler;
+		Windows::Foundation::EventRegistrationToken OnDeviceReplacedHandler;
     };
 }
 }

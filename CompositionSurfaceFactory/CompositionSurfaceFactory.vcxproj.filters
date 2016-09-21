@@ -12,6 +12,7 @@
     <ClCompile Include="SharedLock.cpp" />
     <ClCompile Include="TextSurface.cpp" />
     <ClCompile Include="UriSurface.cpp" />
+    <ClCompile Include="DeviceLostHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -22,6 +23,7 @@
     <ClInclude Include="UriSurface.h" />
     <ClInclude Include="SurfaceFactoryOptions.h" />
     <ClInclude Include="ImageEnums.h" />
+    <ClInclude Include="DeviceLostHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

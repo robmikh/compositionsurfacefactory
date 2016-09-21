@@ -2,6 +2,7 @@
 #include "SurfaceFactoryOptions.h"
 #include "TextSurfaceEnums.h"
 #include "ImageEnums.h"
+#include "DeviceLostHelper.h"
 
 namespace Robmikh
 {
@@ -72,9 +73,8 @@ namespace CompositionSurfaceFactory
 
         void Uninitialize();
 
-        void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation ^sender, Platform::Object ^args);
         void OnRenderingDeviceReplaced(Windows::UI::Composition::CompositionGraphicsDevice ^sender, Windows::UI::Composition::RenderingDeviceReplacedEventArgs ^args);
-        void OnDeviceLost(Microsoft::Graphics::Canvas::CanvasDevice ^sender, Platform::Object ^args);
+        void OnDeviceLost(Platform::Object^ sender, DeviceLostEventArgs^ args);
 
         void CreateDevice(SurfaceFactoryOptions options);
         void RaiseDeviceReplacedEvent(RenderingDeviceReplacedEventArgs ^args);     
@@ -89,12 +89,11 @@ namespace CompositionSurfaceFactory
         CanvasDevice^ m_canvasDevice;
         CompositionGraphicsDevice^ m_graphicsDevice;
         SharedLock^ m_drawingLock;
-        bool m_isCanvasDeviceCreator;
         bool m_isGraphicsDeviceCreator;
 
-        EventRegistrationToken OnDeviceLostHandler;
-        EventRegistrationToken OnRenderingDeviceReplacedHandler;
-        EventRegistrationToken OnDisplayContentsInvalidatedHandler;
+		DeviceLostHelper^ m_deviceLostHelper;
+		Windows::Foundation::EventRegistrationToken OnDeviceLostHandler;
+		Windows::Foundation::EventRegistrationToken OnRenderingDeviceReplacedHandler;
     };
 }
 }
