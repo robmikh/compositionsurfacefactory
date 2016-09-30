@@ -1,3 +1,6 @@
+# This is an archive of the old C# version of this package. It is no longer supported, and here for archival purposes.
+
+
 # CompositionImageLoader
 CompositionImageLoader is an image loader to use with the Windows.UI.Composition api based on Win2D and written with C#.
 
