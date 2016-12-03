@@ -13,6 +13,7 @@
     <ClCompile Include="UriSurface.cpp" />
     <ClCompile Include="DeviceLostHelper.cpp" />
     <ClCompile Include="Lock.cpp" />
+    <ClCompile Include="SurfaceUtilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -24,6 +25,7 @@
     <ClInclude Include="ImageEnums.h" />
     <ClInclude Include="DeviceLostHelper.h" />
     <ClInclude Include="Lock.h" />
+    <ClInclude Include="SurfaceUtilities.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

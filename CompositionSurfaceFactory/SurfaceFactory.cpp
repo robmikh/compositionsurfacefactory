@@ -191,51 +191,6 @@ void SurfaceFactory::OnDeviceLost(Platform::Object^ sender, DeviceLostEventArgs^
     CanvasComposition::SetCanvasDevice(m_graphicsDevice, m_canvasDevice);
 }
 
-CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromUri(Uri^ uri)
-{
-    return CreateSurfaceFromUri(uri, Size::Empty);
-}
-
-CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromUri(Uri^ uri, Size size)
-{
-    return CreateSurfaceFromUri(uri, size, InterpolationMode::Linear);
-}
-
-CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromUri(Uri^ uri, Size size, InterpolationMode interpolation)
-{
-    auto surface = CreateSurface(size);
-
-    // We don't await this call, as we don't want to block the caller
-    auto ignored = DrawSurface(surface, uri, size, interpolation);
-
-    return surface;
-}
-
-IAsyncOperation<CompositionDrawingSurface^>^ SurfaceFactory::CreateSurfaceFromUriAsync(Uri^ uri)
-{
-    return CreateSurfaceFromUriAsync(uri, Size::Empty);
-}
-
-IAsyncOperation<CompositionDrawingSurface^>^ SurfaceFactory::CreateSurfaceFromUriAsync(Uri^ uri, Size size)
-{
-    return CreateSurfaceFromUriAsync(uri, size, InterpolationMode::Linear);
-}
-
-IAsyncOperation<CompositionDrawingSurface^>^ SurfaceFactory::CreateSurfaceFromUriAsync(Uri^ uri, Size size, InterpolationMode interpolation)
-{
-    return concurrency::create_async([=]() -> CompositionDrawingSurface^
-    {
-        auto surface = CreateSurface(size);
-
-        auto drawTask = DrawSurface(surface, uri, size, interpolation).then([surface]()
-        {
-            return surface;
-        });
-
-        return drawTask.get();
-    });
-}
-
 CompositionDrawingSurface^ SurfaceFactory::CreateSurface(Size size)
 {
     Size surfaceSize = size;
@@ -258,58 +213,6 @@ CompositionDrawingSurface^ SurfaceFactory::CreateSurface(Size size)
 	}
 
     return surface;
-}
-
-concurrency::task<void> SurfaceFactory::DrawSurface(CompositionDrawingSurface^ surface, Uri^ uri, Size size, InterpolationMode interpolation) __resumable
-{
-    auto canvasDevice = CanvasComposition::GetCanvasDevice(m_graphicsDevice);
-	if (uri != nullptr)
-	{
-		auto canvasBitmap = co_await CanvasBitmap::LoadAsync(canvasDevice, uri);
-		DrawBitmap(surface, canvasBitmap, size, interpolation);
-	}
-	else
-	{
-		{
-			auto lockSession = m_drawingLock->GetLockSession();
-
-			Size size;
-			size.Width = 1;
-			size.Height = 1;
-			CanvasComposition::Resize(surface, size);
-
-			auto session = CanvasComposition::CreateDrawingSession(surface);
-			session->Clear(Windows::UI::Colors::Transparent);
-		}
-	}
-}
-
-void SurfaceFactory::DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap^ canvasBitmap, Size size, InterpolationMode interpolation)
-{
-    auto bitmapSize = canvasBitmap->Size;
-
-    // Because the drawing is done asynchronously and multiple threads could
-    // be trying to get access to the device/surface at the same time, we need
-    // to do any device/surface work under a lock.
-	{
-		auto lockSession = m_drawingLock->GetLockSession();
-		Size surfaceSize = size;
-		if (surfaceSize.IsEmpty)
-		{
-			// Resize the surface to the size of the image
-			CanvasComposition::Resize(surface, bitmapSize);
-			surfaceSize = bitmapSize;
-		}
-
-		{
-			auto session = CanvasComposition::CreateDrawingSession(surface);
-			Rect surfaceRect = { 0, 0, surfaceSize.Width, surfaceSize.Height };
-			Rect bitmapRect = { 0, 0, bitmapSize.Width, bitmapSize.Height };
-			CanvasImageInterpolation canvasInterpolation = InterpolationModeHelper::GetCanvasImageInterpolation(interpolation);
-			session->Clear(Windows::UI::Colors::Transparent);
-			session->DrawImage(canvasBitmap, surfaceRect, bitmapRect, 1.0f, canvasInterpolation);
-		}
-	}
 }
 
 void SurfaceFactory::ResizeSurface(CompositionDrawingSurface^ surface, Size size)
@@ -410,27 +313,6 @@ TextSurface^ SurfaceFactory::CreateTextSurface(Platform::String^ text,
     textSurface->RedrawSurface();
 
     return textSurface;
-}
-
-CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromBytes(const Array<byte>^ bytes, int widthInPixels, int heightInPixels)
-{
-    return CreateSurfaceFromBytes(bytes, widthInPixels, heightInPixels, Size::Empty);
-}
-
-CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromBytes(const Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size)
-{
-    return CreateSurfaceFromBytes(bytes, widthInPixels, heightInPixels, size, InterpolationMode::Linear);
-}
-
-CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromBytes(const Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size, InterpolationMode interpolation)
-{
-    auto surface = CreateSurface(size);
-
-    auto canvasDevice = CanvasComposition::GetCanvasDevice(m_graphicsDevice);
-    auto canvasBitmap = CanvasBitmap::CreateFromBytes(canvasDevice, bytes, widthInPixels, heightInPixels, Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized);
-    DrawBitmap(surface, canvasBitmap, size, interpolation);
-
-    return surface;
 }
 
 void SurfaceFactory::Uninitialize()

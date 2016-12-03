@@ -213,6 +213,7 @@
     <ClInclude Include="DeviceLostHelper.h" />
     <ClInclude Include="ImageEnums.h" />
     <ClInclude Include="SurfaceFactoryOptions.h" />
+    <ClInclude Include="SurfaceUtilities.h" />
     <ClInclude Include="UriSurface.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Lock.h" />
@@ -222,6 +223,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceLostHelper.cpp" />
+    <ClCompile Include="SurfaceUtilities.cpp" />
     <ClCompile Include="UriSurface.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

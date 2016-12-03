@@ -2,6 +2,7 @@
 #include "SurfaceFactory.h"
 #include "UriSurface.h"
 #include "Lock.h"
+#include "SurfaceUtilities.h"
 
 using namespace Robmikh::CompositionSurfaceFactory;
 using namespace Platform;
@@ -62,28 +63,26 @@ IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri, WF::Size size)
 
 IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation)
 {
+	m_uri = uri;
+	m_interpolationMode = interpolation;
     m_desiredSize = size;
-    return concurrency::create_async([this, uri, size, interpolation]() -> concurrency::task<void>
-    {
-        return RedrawSurfaceWorker(uri, size, interpolation);
-    });
+
+	if (m_uri != nullptr)
+	{
+		return SurfaceUtilities::FillSurfaceWithUriAsync(m_surfaceFactory, m_surface, m_uri, m_desiredSize, m_interpolationMode);
+	}
+	else
+	{
+		return concurrency::create_async([=]()
+		{
+			SurfaceUtilities::FillSurfaceWithColor(m_surfaceFactory, m_surface, Windows::UI::Colors::Transparent, m_desiredSize);
+		});
+	}
 }
 
 void UriSurface::Resize(WF::Size size)
 {
-    auto lock = m_surfaceFactory->DrawingLock;
-
-	{
-		auto lockSession = lock->GetLockSession();
-		CanvasComposition::Resize(m_surface, size);
-	}
-}
-
-concurrency::task<void> UriSurface::RedrawSurfaceWorker(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation) __resumable
-{
-    m_uri = uri;
-    m_interpolationMode = interpolation;
-    co_await m_surfaceFactory->DrawSurface(m_surface, m_uri, size, m_interpolationMode);
+	m_surfaceFactory->ResizeSurface(m_surface, size);
 }
 
 void UriSurface::Uninitialize()
