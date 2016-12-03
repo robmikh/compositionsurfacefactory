@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "SurfaceFactory.h"
 #include "UriSurface.h"
-#include "SharedLock.h"
+#include "Lock.h"
+#include "SurfaceUtilities.h"
 
 using namespace Robmikh::CompositionSurfaceFactory;
 using namespace Platform;
@@ -42,48 +43,46 @@ UriSurface::~UriSurface()
 void UriSurface::OnDeviceReplacedEvent(Object ^sender, RenderingDeviceReplacedEventArgs ^args)
 {
     OutputDebugString(L"CompositionSurfaceFactory - Redrawing UriSurface from Device Replaced");
-    auto ignored = RedrawSurface();
+    auto ignored = RedrawSurfaceAsync();
 }
 
-IAsyncAction^ UriSurface::RedrawSurface()
+IAsyncAction^ UriSurface::RedrawSurfaceAsync()
 {
-    return RedrawSurface(m_uri);
+    return RedrawSurfaceAsync(m_uri);
 }
 
-IAsyncAction^ UriSurface::RedrawSurface(Uri^ uri)
+IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri)
 {
-    return RedrawSurface(uri, m_desiredSize);
+    return RedrawSurfaceAsync(uri, m_desiredSize);
 }
 
-IAsyncAction^ UriSurface::RedrawSurface(Uri^ uri, WF::Size size)
+IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri, WF::Size size)
 {
-    return RedrawSurface(uri, size, m_interpolationMode);
+    return RedrawSurfaceAsync(uri, size, m_interpolationMode);
 }
 
-IAsyncAction^ UriSurface::RedrawSurface(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation)
+IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation)
 {
+	m_uri = uri;
+	m_interpolationMode = interpolation;
     m_desiredSize = size;
-    return concurrency::create_async([this, uri, size, interpolation]() -> concurrency::task<void>
-    {
-        return RedrawSurfaceWorker(uri, size, interpolation);
-    });
+
+	if (m_uri != nullptr)
+	{
+		return SurfaceUtilities::FillSurfaceWithUriAsync(m_surfaceFactory, m_surface, m_uri, m_desiredSize, m_interpolationMode);
+	}
+	else
+	{
+		return concurrency::create_async([=]()
+		{
+			SurfaceUtilities::FillSurfaceWithColor(m_surfaceFactory, m_surface, Windows::UI::Colors::Transparent, m_desiredSize);
+		});
+	}
 }
 
 void UriSurface::Resize(WF::Size size)
 {
-    auto lock = m_surfaceFactory->DrawingLock;
-
-    lock->Lock(ref new SharedLockWork([=]() mutable
-    {
-        CanvasComposition::Resize(m_surface, size);
-    }));
-}
-
-concurrency::task<void> UriSurface::RedrawSurfaceWorker(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation) __resumable
-{
-    m_uri = uri;
-    m_interpolationMode = interpolation;
-    co_await m_surfaceFactory->DrawSurface(m_surface, m_uri, size, m_interpolationMode);
+	m_surfaceFactory->ResizeSurface(m_surface, size);
 }
 
 void UriSurface::Uninitialize()

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SurfaceFactory.h"
 #include "TextSurface.h"
-#include "SharedLock.h"
+#include "Lock.h"
 
 using namespace Robmikh::CompositionSurfaceFactory;
 using namespace Platform;
@@ -257,35 +257,36 @@ void TextSurface::UpdateTextLayout()
 {
     auto lock = m_surfaceFactory->DrawingLock;
 
-    lock->Lock(ref new SharedLockWork([=]() mutable
-    {
-        auto session = CanvasComposition::CreateDrawingSession(m_surface);
-        m_textLayout = ref new CanvasTextLayout(session, m_text, m_textFormat, m_width, m_height);
-    }));
+	{
+		auto lockSession = lock->GetLockSession();
+		auto session = CanvasComposition::CreateDrawingSession(m_surface);
+		m_textLayout = ref new CanvasTextLayout(session, m_text, m_textFormat, m_width, m_height);
+	}
 }
 
 void TextSurface::RedrawSurface()
 {
     auto lock = m_surfaceFactory->DrawingLock;
 
-    lock->Lock(ref new SharedLockWork([=]() mutable
-    {
-        float width = (float)(m_textLayout->DrawBounds.Left + m_textLayout->DrawBounds.Right) + m_padding.Left + m_padding.Right;
-        float height = (float)(m_textLayout->DrawBounds.Top + m_textLayout->DrawBounds.Bottom) + m_padding.Top + m_padding.Bottom;
-        // The surface can't have any dimmension be 0, so make it at least 1.0f
-        if (width < 1.0f)
-        {
-            width = 1.0f;
-        }
-        if (height < 1.0f)
-        {
-            height = 1.0f;
-        }
-        CanvasComposition::Resize(m_surface, { width, height });
-        auto session = CanvasComposition::CreateDrawingSession(m_surface);
-        session->Clear(m_backgroundColor);
-        session->DrawTextLayout(m_textLayout, m_padding.Left, m_padding.Right, m_foregroundColor);
-    }));
+	{
+		auto lockSession = lock->GetLockSession();
+
+		float width = (float)(m_textLayout->DrawBounds.Left + m_textLayout->DrawBounds.Right) + m_padding.Left + m_padding.Right;
+		float height = (float)(m_textLayout->DrawBounds.Top + m_textLayout->DrawBounds.Bottom) + m_padding.Top + m_padding.Bottom;
+		// The surface can't have any dimmension be 0, so make it at least 1.0f
+		if (width < 1.0f)
+		{
+			width = 1.0f;
+		}
+		if (height < 1.0f)
+		{
+			height = 1.0f;
+		}
+		CanvasComposition::Resize(m_surface, { width, height });
+		auto session = CanvasComposition::CreateDrawingSession(m_surface);
+		session->Clear(m_backgroundColor);
+		session->DrawTextLayout(m_textLayout, m_padding.Left, m_padding.Right, m_foregroundColor);
+	}
 
     auto args = TextSurfaceRedrawnEventArgs::Create(this, m_surfaceFactory);
     concurrency::create_async([this, args]

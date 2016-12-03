@@ -28,10 +28,10 @@ namespace CompositionSurfaceFactory
         }
         property InterpolationMode InterpolationMode { CompositionSurfaceFactory::InterpolationMode get() { return m_interpolationMode; }}
 
-        IAsyncAction^ RedrawSurface();
-        IAsyncAction^ RedrawSurface(Uri^ uri);
-        IAsyncAction^ RedrawSurface(Uri^ uri, Windows::Foundation::Size size);
-        IAsyncAction^ RedrawSurface(Uri^ uri, Windows::Foundation::Size size, CompositionSurfaceFactory::InterpolationMode interpolation);
+        IAsyncAction^ RedrawSurfaceAsync();
+        IAsyncAction^ RedrawSurfaceAsync(Uri^ uri);
+        IAsyncAction^ RedrawSurfaceAsync(Uri^ uri, Windows::Foundation::Size size);
+        IAsyncAction^ RedrawSurfaceAsync(Uri^ uri, Windows::Foundation::Size size, CompositionSurfaceFactory::InterpolationMode interpolation);
         void Resize(Windows::Foundation::Size size);
 
         virtual ~UriSurface();

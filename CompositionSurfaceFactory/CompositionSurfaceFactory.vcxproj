@@ -213,15 +213,17 @@
     <ClInclude Include="DeviceLostHelper.h" />
     <ClInclude Include="ImageEnums.h" />
     <ClInclude Include="SurfaceFactoryOptions.h" />
+    <ClInclude Include="SurfaceUtilities.h" />
     <ClInclude Include="UriSurface.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SharedLock.h" />
+    <ClInclude Include="Lock.h" />
     <ClInclude Include="SurfaceFactory.h" />
     <ClInclude Include="TextSurface.h" />
     <ClInclude Include="TextSurfaceEnums.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceLostHelper.cpp" />
+    <ClCompile Include="SurfaceUtilities.cpp" />
     <ClCompile Include="UriSurface.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -231,7 +233,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="SharedLock.cpp" />
+    <ClCompile Include="Lock.cpp" />
     <ClCompile Include="SurfaceFactory.cpp" />
     <ClCompile Include="TextSurface.cpp" />
   </ItemGroup>
