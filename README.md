@@ -9,24 +9,10 @@ PM>  Install-Package Robmikh.CompositionSurfaceFactory -Pre
 Learn more [here](https://www.nuget.org/packages/Robmikh.CompositionSurfaceFactory).
 
 ## Usage
-Loading images into a surface is easy using CompositionSurfaceFactory:
-```
-var surfaceFactory = SurfaceFactory.CreateFromCompositor(_compositor);
-var surface = surfaceFactory.CreateSurfaceFromUri(new Uri("ms-appx:///Assets/Images/testimage.png"));
-```
-You can also pass in a CompositionGraphicsDevice instead of a Compositor if you already have a device you would like the SurfaceFactory to use.
-```
-var surfaceFactory = SurfaceFactory.CreateFromGraphicsDevice(_compositionGraphicsDevice);
-var surface = await surfaceFactory.CreateSurfaceFromUriAsync(new Uri("ms-appx:///Assets/Images/testimage.png"));
-```
-
-### CreateSurfaceFromUri vs CreateSurfaceFromUriAsync
-CreateSurfaceFromUri will immediately return a surface that is initially be empty. Later on a thread pool thread, the surface will be resized and filled in with the decoded image. This means that the call is synchronous but the image won't actually be loaded until a later time.
-
-CreateSurfaceFromUriAsync will asynchronously create a surface and decode the image at the same time. This means that when you get the surface back it is guaranteed to be filled in.
 
 ### UriSurface
-UriSurface (formerly ManagedSurface) is just a wrapper to the CompositionDrawingSurface class which handles device lost events raised by the SurfaceFactory. Using it is similar to CreateSurfaceFromUri(Async):
+UriSurface (formerly ManagedSurface) is just a wrapper to the CompositionDrawingSurface class which handles device lost events raised by the SurfaceFactory. When created with CreateUriSurface, the function will return immediately with a surface that is initialy empty and will be filled in asynchronously. When created with CreateUriSurfaceAsync the surface will be created and the image will be decoded at the same time. This means that when you get the surface back it is guaranteed to be filled in.
+
 ```
 var uriSurface = _surfaceFactory.CreateUriSurface(new Uri("ms-appx:///Assets/Images/testimage.png"));
 //
