@@ -241,7 +241,7 @@ UriSurface^ SurfaceFactory::CreateUriSurface(Uri^ uri, Size size)
 UriSurface^ SurfaceFactory::CreateUriSurface(Uri^ uri, Size size, InterpolationMode interpolation)
 {
     auto uriSurface = UriSurface::Create(this, uri, size, interpolation);
-    auto ignored = uriSurface->RedrawSurface();
+    auto ignored = uriSurface->RedrawSurfaceAsync();
 
     return uriSurface;
 }
@@ -262,7 +262,7 @@ IAsyncOperation<UriSurface^>^ SurfaceFactory::CreateUriSurfaceAsync(Uri^ uri, Si
     {
         auto uriSurface = UriSurface::Create(this, uri, size, interpolation);
 
-        auto drawTask = concurrency::create_task(uriSurface->RedrawSurface()).then([uriSurface]() -> UriSurface^
+        auto drawTask = concurrency::create_task(uriSurface->RedrawSurfaceAsync()).then([uriSurface]() -> UriSurface^
         {
             return uriSurface;
         });
