@@ -7,6 +7,9 @@
 #include <d3d11_4.h>
 #include <Windows.Graphics.DirectX.Direct3D11.interop.h>
 
+using namespace Platform::Collections;
+using namespace Windows::Foundation::Collections;
+
 using namespace Windows::Foundation;
 using namespace Windows::UI::Text;
 using namespace Windows::UI::Composition;

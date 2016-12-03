@@ -19,6 +19,8 @@ namespace CompositionSurfaceFactory
     public ref class SurfaceFactory sealed
     {
     public:
+		static SurfaceFactory^ GetSharedSurfaceFactoryForCompositor(Compositor^ compositor);
+		static void ClearSharedSurfaceFactories();
         [Windows::Foundation::Metadata::DefaultOverloadAttribute]
         static SurfaceFactory^ CreateFromCompositor(Compositor^ compositor);
         static SurfaceFactory^ CreateFromCompositor(Compositor^ compositor, SurfaceFactoryOptions options);
@@ -96,6 +98,9 @@ namespace CompositionSurfaceFactory
 		DeviceLostHelper^ m_deviceLostHelper;
 		Windows::Foundation::EventRegistrationToken OnDeviceLostHandler;
 		Windows::Foundation::EventRegistrationToken OnRenderingDeviceReplacedHandler;
+
+		static IVector<SurfaceFactory^>^ s_surfaceFactories;
+		static Lock^ s_listLock;
     };
 }
 }

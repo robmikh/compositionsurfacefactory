@@ -11,6 +11,78 @@ using namespace Windows::Graphics::Display;
 
 namespace CSF = Robmikh::CompositionSurfaceFactory;
 
+IVector<SurfaceFactory^>^ CSF::SurfaceFactory::s_surfaceFactories = ref new Vector<CSF::SurfaceFactory^>();
+Lock^ CSF::SurfaceFactory::s_listLock = ref new Lock();
+
+SurfaceFactory^ SurfaceFactory::GetSharedSurfaceFactoryForCompositor(WUC::Compositor^ compositor)
+{
+	SurfaceFactory^ result = nullptr;
+
+	// We do this under a lock so that it is safe for multiple callers on different threads. The
+	// SurfaceFactory itself may also be changing the list when it is being destroyed.
+	{
+		auto lockSession = s_listLock->GetLockSession();
+
+		// Look to see if one of the surface factories is associated with the compositor
+		for (unsigned int i = 0; i < s_surfaceFactories->Size; i++)
+		{
+			auto surfaceFactory = s_surfaceFactories->GetAt(i);
+
+			if (surfaceFactory->Compositor == compositor)
+			{
+				result = surfaceFactory;
+				break;
+			}
+		}
+
+		// If we didn't find one, then make one and add it to the list
+		if (result == nullptr)
+		{
+			result = SurfaceFactory::CreateFromCompositor(compositor);
+			s_surfaceFactories->Append(result);
+		}
+	}
+
+	return result;
+}
+
+void SurfaceFactory::ClearSharedSurfaceFactories()
+{
+	auto copiedList = ref new Vector<SurfaceFactory^>();
+
+	// We do this under a lock so that it is safe for multiple callers on different threads. The
+	// SurfaceFactory itself may also be changing the list when it is being destroyed.
+	{
+		auto lockSession = s_listLock->GetLockSession();
+
+		// Copy the list so that when we are disposing the SurfaceFactory objects they don't
+		// screw with the list as we are iterating through it.
+		for (unsigned int i = 0; i < s_surfaceFactories->Size; i++)
+		{
+			auto surfaceFactory = s_surfaceFactories->GetAt(i);
+
+			copiedList->Append(surfaceFactory);
+		}
+	}
+
+
+	// Dispose all the SurfaceFactories. This has to be done outside of the lock because the
+	// SurfaceFactory will request the lock when disposing, and we would dead lock;
+	for (unsigned int i = 0; i < copiedList->Size; i++)
+	{
+		auto surfaceFactory = copiedList->GetAt(i);
+
+		surfaceFactory->~SurfaceFactory();
+	}
+
+	{
+		auto lockSession = s_listLock->GetLockSession();
+		s_surfaceFactories->Clear();
+	}
+
+	copiedList->Clear();
+}
+
 SurfaceFactory^ SurfaceFactory::CreateFromCompositor(WUC::Compositor^ compositor)
 {
     auto options = SurfaceFactoryOptions();
@@ -365,6 +437,7 @@ void SurfaceFactory::Uninitialize()
 {
 	{
 		auto lockSession = m_drawingLock->GetLockSession();
+
 		m_compositor = nullptr;
 		if (m_canvasDevice != nullptr)
 		{
@@ -384,6 +457,15 @@ void SurfaceFactory::Uninitialize()
 				m_graphicsDevice->~CompositionGraphicsDevice();
 			}
 			m_graphicsDevice = nullptr;
+		}
+
+		{
+			auto listLockSession = s_listLock->GetLockSession();
+			unsigned int index = 0;
+			if (s_surfaceFactories->IndexOf(this, &index))
+			{
+				s_surfaceFactories->RemoveAt(index);
+			}
 		}
 	}
 	m_drawingLock = nullptr;
