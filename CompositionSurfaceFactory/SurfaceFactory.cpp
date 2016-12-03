@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "SurfaceFactory.h"
-#include "SharedLock.h"
+#include "Lock.h"
 #include "UriSurface.h"
 #include "TextSurface.h"
 #include "SurfaceFactoryOptions.h"
@@ -32,7 +32,7 @@ SurfaceFactory^ SurfaceFactory::CreateFromGraphicsDevice(CompositionGraphicsDevi
     return surfaceFactory;
 }
 
-SurfaceFactory^ SurfaceFactory::CreateFromGraphicsDevice(CompositionGraphicsDevice^ graphicsDevice, SharedLock^ lock)
+SurfaceFactory^ SurfaceFactory::CreateFromGraphicsDevice(CompositionGraphicsDevice^ graphicsDevice, Lock^ lock)
 {
     auto surfaceFactory = ref new SurfaceFactory(graphicsDevice, lock);
     return surfaceFactory;
@@ -41,7 +41,7 @@ SurfaceFactory^ SurfaceFactory::CreateFromGraphicsDevice(CompositionGraphicsDevi
 SurfaceFactory::SurfaceFactory(WUC::Compositor^ compositor, SurfaceFactoryOptions options)
 {
     m_compositor = compositor;
-    m_drawingLock = ref new SharedLock();
+    m_drawingLock = ref new Lock();
     m_isGraphicsDeviceCreator = true;
 	m_deviceLostHelper = ref new DeviceLostHelper();
 	OnDeviceLostHandler = m_deviceLostHelper->DeviceLost
@@ -50,14 +50,14 @@ SurfaceFactory::SurfaceFactory(WUC::Compositor^ compositor, SurfaceFactoryOption
     CreateDevice(options);
 }
 
-SurfaceFactory::SurfaceFactory(CompositionGraphicsDevice^ graphicsDevice, SharedLock^ lock)
+SurfaceFactory::SurfaceFactory(CompositionGraphicsDevice^ graphicsDevice, Lock^ lock)
 {
     m_compositor = graphicsDevice->Compositor;
     m_graphicsDevice = graphicsDevice;
     m_isGraphicsDeviceCreator = false;
     if (lock == nullptr)
     {
-        m_drawingLock = ref new SharedLock();
+        m_drawingLock = ref new Lock();
     }
     else
     {
@@ -176,13 +176,14 @@ CompositionDrawingSurface^ SurfaceFactory::CreateSurface(Size size)
 
     CompositionGraphicsDevice^ graphicsDevice = m_graphicsDevice;
     CompositionDrawingSurface^ surface = nullptr;
-    m_drawingLock->Lock(ref new SharedLockWork([&surface, graphicsDevice, surfaceSize]() mutable
-    {
-        surface = graphicsDevice->CreateDrawingSurface(
-            surfaceSize,
-            Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized,
-            Windows::Graphics::DirectX::DirectXAlphaMode::Premultiplied);
-    }));
+
+	{
+		auto lockSession = m_drawingLock->GetLockSession();
+		surface = graphicsDevice->CreateDrawingSurface(
+			surfaceSize,
+			Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized,
+			Windows::Graphics::DirectX::DirectXAlphaMode::Premultiplied);
+	}
 
     return surface;
 }
@@ -201,31 +202,33 @@ void SurfaceFactory::DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap
     // Because the drawing is done asynchronously and multiple threads could
     // be trying to get access to the device/surface at the same time, we need
     // to do any device/surface work under a lock.
-    m_drawingLock->Lock(ref new SharedLockWork([=]()
-    {
-        Size surfaceSize = size;
-        if (surfaceSize.IsEmpty)
-        {
-            // Resize the surface to the size of the image
-            CanvasComposition::Resize(surface, bitmapSize);
-            surfaceSize = bitmapSize;
-        }
-        
-        auto session = CanvasComposition::CreateDrawingSession(surface);
-        Rect surfaceRect = { 0, 0, surfaceSize.Width, surfaceSize.Height };
-        Rect bitmapRect = { 0, 0, bitmapSize.Width, bitmapSize.Height };
-        CanvasImageInterpolation canvasInterpolation = InterpolationModeHelper::GetCanvasImageInterpolation(interpolation);
-        session->Clear(Windows::UI::Colors::Transparent);
-        session->DrawImage(canvasBitmap, surfaceRect, bitmapRect, 1.0f, canvasInterpolation);
-    }));
+	{
+		auto lockSession = m_drawingLock->GetLockSession();
+		Size surfaceSize = size;
+		if (surfaceSize.IsEmpty)
+		{
+			// Resize the surface to the size of the image
+			CanvasComposition::Resize(surface, bitmapSize);
+			surfaceSize = bitmapSize;
+		}
+
+		{
+			auto session = CanvasComposition::CreateDrawingSession(surface);
+			Rect surfaceRect = { 0, 0, surfaceSize.Width, surfaceSize.Height };
+			Rect bitmapRect = { 0, 0, bitmapSize.Width, bitmapSize.Height };
+			CanvasImageInterpolation canvasInterpolation = InterpolationModeHelper::GetCanvasImageInterpolation(interpolation);
+			session->Clear(Windows::UI::Colors::Transparent);
+			session->DrawImage(canvasBitmap, surfaceRect, bitmapRect, 1.0f, canvasInterpolation);
+		}
+	}
 }
 
 void SurfaceFactory::ResizeSurface(CompositionDrawingSurface^ surface, Size size)
 {
-    m_drawingLock->Lock(ref new SharedLockWork([=]()
-    {
-        CanvasComposition::Resize(surface, size);
-    }));
+	{
+		auto lockSession = m_drawingLock->GetLockSession();
+		CanvasComposition::Resize(surface, size);
+	}
 }
 
 UriSurface^ SurfaceFactory::CreateUriSurface(Uri^ uri)
@@ -333,27 +336,28 @@ CompositionDrawingSurface^ SurfaceFactory::CreateSurfaceFromBytes(const Array<by
 
 void SurfaceFactory::Uninitialize()
 {
-    m_drawingLock->Lock(ref new SharedLockWork([=]() mutable
-    {
-        m_compositor = nullptr;
-        if (m_canvasDevice != nullptr)
-        {
+	{
+		auto lockSession = m_drawingLock->GetLockSession();
+		m_compositor = nullptr;
+		if (m_canvasDevice != nullptr)
+		{
 			m_deviceLostHelper->StopWatchingCurrentDevice();
 			m_deviceLostHelper = nullptr;
 
 			m_canvasDevice->~CanvasDevice();
-            m_canvasDevice = nullptr;
-        }
-        
-        if (m_graphicsDevice != nullptr)
-        {
-            m_graphicsDevice->RenderingDeviceReplaced -= OnRenderingDeviceReplacedHandler;
-            // Only dispose the composition graphics device if we own the device.
-            if (m_isGraphicsDeviceCreator)
-            {
-                m_graphicsDevice->~CompositionGraphicsDevice();
-            }
-            m_graphicsDevice = nullptr;
-        }
-    }));
+			m_canvasDevice = nullptr;
+		}
+
+		if (m_graphicsDevice != nullptr)
+		{
+			m_graphicsDevice->RenderingDeviceReplaced -= OnRenderingDeviceReplacedHandler;
+			// Only dispose the composition graphics device if we own the device.
+			if (m_isGraphicsDeviceCreator)
+			{
+				m_graphicsDevice->~CompositionGraphicsDevice();
+			}
+			m_graphicsDevice = nullptr;
+		}
+	}
+	m_drawingLock = nullptr;
 }

@@ -9,21 +9,21 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="SurfaceFactory.cpp" />
-    <ClCompile Include="SharedLock.cpp" />
     <ClCompile Include="TextSurface.cpp" />
     <ClCompile Include="UriSurface.cpp" />
     <ClCompile Include="DeviceLostHelper.cpp" />
+    <ClCompile Include="Lock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="SurfaceFactory.h" />
-    <ClInclude Include="SharedLock.h" />
     <ClInclude Include="TextSurface.h" />
     <ClInclude Include="TextSurfaceEnums.h" />
     <ClInclude Include="UriSurface.h" />
     <ClInclude Include="SurfaceFactoryOptions.h" />
     <ClInclude Include="ImageEnums.h" />
     <ClInclude Include="DeviceLostHelper.h" />
+    <ClInclude Include="Lock.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

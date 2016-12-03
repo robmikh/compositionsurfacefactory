@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SurfaceFactory.h"
 #include "UriSurface.h"
-#include "SharedLock.h"
+#include "Lock.h"
 
 using namespace Robmikh::CompositionSurfaceFactory;
 using namespace Platform;
@@ -73,10 +73,10 @@ void UriSurface::Resize(WF::Size size)
 {
     auto lock = m_surfaceFactory->DrawingLock;
 
-    lock->Lock(ref new SharedLockWork([=]() mutable
-    {
-        CanvasComposition::Resize(m_surface, size);
-    }));
+	{
+		auto lockSession = lock->GetLockSession();
+		CanvasComposition::Resize(m_surface, size);
+	}
 }
 
 concurrency::task<void> UriSurface::RedrawSurfaceWorker(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation) __resumable

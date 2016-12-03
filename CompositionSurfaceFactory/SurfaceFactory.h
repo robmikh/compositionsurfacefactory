@@ -9,7 +9,7 @@ namespace Robmikh
 namespace CompositionSurfaceFactory
 {
     ref class SurfaceFactory;
-    ref class SharedLock;
+    ref class Lock;
     ref class UriSurface;
     ref class TextSurface;
     value struct Padding;
@@ -24,11 +24,11 @@ namespace CompositionSurfaceFactory
         static SurfaceFactory^ CreateFromCompositor(Compositor^ compositor, SurfaceFactoryOptions options);
         [Windows::Foundation::Metadata::DefaultOverloadAttribute]
         static SurfaceFactory^ CreateFromGraphicsDevice(CompositionGraphicsDevice^ graphicsDevice);
-        static SurfaceFactory^ CreateFromGraphicsDevice(CompositionGraphicsDevice^ graphicsDevice, SharedLock^ lock);
+        static SurfaceFactory^ CreateFromGraphicsDevice(CompositionGraphicsDevice^ graphicsDevice, Lock^ lock);
 
         property Compositor^ Compositor { WUC::Compositor^ get() { return m_compositor; } }
         property CompositionGraphicsDevice^ GraphicsDevice { CompositionGraphicsDevice^ get() { return m_graphicsDevice; }}
-        property SharedLock^ DrawingLock { SharedLock^ get() { return m_drawingLock; }}
+        property Lock^ DrawingLock { Lock^ get() { return m_drawingLock; }}
 
         CompositionDrawingSurface^ CreateSurface(Size size);
 
@@ -69,7 +69,7 @@ namespace CompositionSurfaceFactory
         virtual ~SurfaceFactory();
     private:
         SurfaceFactory(WUC::Compositor^ compositor, SurfaceFactoryOptions options);
-        SurfaceFactory(CompositionGraphicsDevice^ graphicsDevice, SharedLock^ lock);
+        SurfaceFactory(CompositionGraphicsDevice^ graphicsDevice, Lock^ lock);
 
         void Uninitialize();
 
@@ -88,7 +88,7 @@ namespace CompositionSurfaceFactory
         WUC::Compositor^ m_compositor;
         CanvasDevice^ m_canvasDevice;
         CompositionGraphicsDevice^ m_graphicsDevice;
-        SharedLock^ m_drawingLock;
+        Lock^ m_drawingLock;
         bool m_isGraphicsDeviceCreator;
 
 		DeviceLostHelper^ m_deviceLostHelper;
