@@ -44,6 +44,7 @@ namespace CompositionSurfaceFactory
         CompositionDrawingSurface^ CreateSurfaceFromBytes(const Platform::Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size);
         CompositionDrawingSurface^ CreateSurfaceFromBytes(const Platform::Array<byte>^ bytes, int widthInPixels, int heightInPixels, Size size, InterpolationMode interpolation);
 
+		UriSurface^ CreateUriSurface();
         UriSurface^ CreateUriSurface(Uri^ uri);
         UriSurface^ CreateUriSurface(Uri^ uri, Size size);
         UriSurface^ CreateUriSurface(Uri^ uri, Size size, InterpolationMode interpolation);
@@ -52,6 +53,7 @@ namespace CompositionSurfaceFactory
         IAsyncOperation<UriSurface^>^ CreateUriSurfaceAsync(Uri^ uri, Size size);
         IAsyncOperation<UriSurface^>^ CreateUriSurfaceAsync(Uri^ uri, Size size, InterpolationMode interpolation);
 
+		TextSurface^ CreateTextSurface();
         TextSurface^ CreateTextSurface(Platform::String^ text);
         TextSurface^ CreateTextSurface(Platform::String^ text,
                                        float width,

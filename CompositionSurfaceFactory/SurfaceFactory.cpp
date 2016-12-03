@@ -191,8 +191,25 @@ CompositionDrawingSurface^ SurfaceFactory::CreateSurface(Size size)
 concurrency::task<void> SurfaceFactory::DrawSurface(CompositionDrawingSurface^ surface, Uri^ uri, Size size, InterpolationMode interpolation) __resumable
 {
     auto canvasDevice = CanvasComposition::GetCanvasDevice(m_graphicsDevice);
-    auto canvasBitmap = co_await CanvasBitmap::LoadAsync(canvasDevice, uri);
-    DrawBitmap(surface, canvasBitmap, size, interpolation);
+	if (uri != nullptr)
+	{
+		auto canvasBitmap = co_await CanvasBitmap::LoadAsync(canvasDevice, uri);
+		DrawBitmap(surface, canvasBitmap, size, interpolation);
+	}
+	else
+	{
+		{
+			auto lockSession = m_drawingLock->GetLockSession();
+
+			Size size;
+			size.Width = 1;
+			size.Height = 1;
+			CanvasComposition::Resize(surface, size);
+
+			auto session = CanvasComposition::CreateDrawingSession(surface);
+			session->Clear(Windows::UI::Colors::Transparent);
+		}
+	}
 }
 
 void SurfaceFactory::DrawBitmap(CompositionDrawingSurface^ surface, CanvasBitmap^ canvasBitmap, Size size, InterpolationMode interpolation)
@@ -229,6 +246,11 @@ void SurfaceFactory::ResizeSurface(CompositionDrawingSurface^ surface, Size size
 		auto lockSession = m_drawingLock->GetLockSession();
 		CanvasComposition::Resize(surface, size);
 	}
+}
+
+UriSurface^ SurfaceFactory::CreateUriSurface()
+{
+	return CreateUriSurface(nullptr);
 }
 
 UriSurface^ SurfaceFactory::CreateUriSurface(Uri^ uri)
@@ -272,6 +294,11 @@ IAsyncOperation<UriSurface^>^ SurfaceFactory::CreateUriSurfaceAsync(Uri^ uri, Si
 
         return drawTask.get();
     });
+}
+
+TextSurface^ SurfaceFactory::CreateTextSurface()
+{
+	return CreateTextSurface("");
 }
 
 TextSurface^ SurfaceFactory::CreateTextSurface(Platform::String^ text)
