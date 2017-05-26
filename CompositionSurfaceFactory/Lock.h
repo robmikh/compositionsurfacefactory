@@ -27,6 +27,8 @@ namespace CompositionSurfaceFactory
 		virtual ~LockSession();
 	private:
 		Lock^ m_lock;
+
+		static long s_lockCount;
 	};
 }
 }
