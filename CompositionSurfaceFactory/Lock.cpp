@@ -6,7 +6,9 @@ using namespace Platform;
 
 long LockSession::s_lockCount = 0;
 
-Lock::Lock() { }
+Lock::Lock() { InitializeCriticalSection(&m_criticalSection); }
+
+Lock::~Lock() { DeleteCriticalSection(&m_criticalSection); }
 
 LockSession^ Lock::GetLockSession()
 {
@@ -16,23 +18,23 @@ LockSession^ Lock::GetLockSession()
 
 void Lock::LockInternal()
 {
-	m_mutex.lock();
+	EnterCriticalSection(&m_criticalSection);
 }
 
 void Lock::UnlockInternal()
 {
-	m_mutex.unlock();
+	LeaveCriticalSection(&m_criticalSection);
 }
 
 LockSession::LockSession(Lock^ lock)
 {
 	m_lock = lock;
-	//m_lock->LockInternal();
+	m_lock->LockInternal();
 	InterlockedIncrement(&s_lockCount);
 }
 
 LockSession::~LockSession()
 {
-	//m_lock->UnlockInternal();
+	m_lock->UnlockInternal();
 	InterlockedDecrement(&s_lockCount);
 }
