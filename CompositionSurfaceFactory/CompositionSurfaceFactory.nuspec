@@ -26,11 +26,14 @@
 
       <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.dll" src="ARM\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-arm\native" src="ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
+      <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.pdb" src="ARM\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.pdb" />
 
       <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.dll" src="Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-x86\native" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
+      <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.pdb" src="Release\CompositionSurfaceFactory\CompositionSurfaceFactory.pdb" />
 
       <file target="runtimes\win10-x64\native\Robmikh.CompositionSurfaceFactory.dll" src="x64\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-x64\native" src="x64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
+      <file target="runtimes\win10-x64\native\Robmikh.CompositionSurfaceFactory.pdb" src="x64\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.pdb" />
   </files>
 </package>
