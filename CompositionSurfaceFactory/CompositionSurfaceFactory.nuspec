@@ -14,7 +14,7 @@
     <releaseNotes>[PLEASE REPLACE BEFORE PUBLISHING]</releaseNotes>
     <copyright>Copyright 2016</copyright>
 	  <dependencies>
-        <dependency id="Win2D.uwp" version="1.19.0" />
+        <dependency id="Win2D.uwp" version="1.21.0" />
     </dependencies>
   </metadata>
   <files>
