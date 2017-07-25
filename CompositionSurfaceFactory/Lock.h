@@ -16,7 +16,9 @@ namespace CompositionSurfaceFactory
 		void LockInternal();
 		void UnlockInternal();
     private:
-        std::mutex m_mutex;
+		~Lock();
+	private:
+		CRITICAL_SECTION m_criticalSection;
     };
 
 	public ref class LockSession sealed
@@ -27,6 +29,9 @@ namespace CompositionSurfaceFactory
 		virtual ~LockSession();
 	private:
 		Lock^ m_lock;
+#if DEBUG
+		static long s_lockCount;
+#endif
 	};
 }
 }
