@@ -12,7 +12,6 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
-    <ClCompile Include="Robmikh.CompositionSurfacFactory.cpp" />
     <ClCompile Include="DeviceLostEventArgs.cpp" />
     <ClCompile Include="DeviceLostHelper.cpp" />
     <ClCompile Include="Lock.cpp" />
@@ -25,7 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Robmikh.CompositionSurfacFactory.h" />
     <ClInclude Include="DeviceLostEventArgs.h" />
     <ClInclude Include="DeviceLostHelper.h" />
     <ClInclude Include="Lock.h" />
@@ -40,6 +38,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Robmikh.CompositionSurfaceFactory.def" />
+    <None Include="VERSION" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Robmikh.CompositionSurfacFactory.idl" />
