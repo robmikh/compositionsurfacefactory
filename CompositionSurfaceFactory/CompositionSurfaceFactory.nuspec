@@ -10,8 +10,12 @@
     <projectUrl>https://github.com/robmikh/compositionsurfacefactory</projectUrl>
     <iconUrl>http://robmikh.com/compimageloader.png</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>CompositionSurfaceFactory is a surface factory intended for use with the Windows.UI.Composition API based on Win2D and written with C++/WinRT. Automatic Image loading and text.</description>
-    <releaseNotes>[PLEASE REPLACE BEFORE PUBLISHING]</releaseNotes>
+    <description>CompositionSurfaceFactory is a surface factory intended for use with the Windows.UI.Composition API based on Win2D and written with C++/WinRT. Automatic image loading and text.</description>
+    <releaseNotes>Release notes:
+Version 0.8.0-prerelease:
+* Port to C++/WinRT
+
+</releaseNotes>
     <copyright>Copyright 2016</copyright>
 	  <dependencies>
         <dependency id="Win2D.uwp" version="1.23.0" />
