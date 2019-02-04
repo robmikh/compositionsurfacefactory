@@ -14,7 +14,7 @@
     <releaseNotes>[PLEASE REPLACE BEFORE PUBLISHING]</releaseNotes>
     <copyright>Copyright 2016</copyright>
 	  <dependencies>
-        <dependency id="Win2D.uwp" version="1.21.0" />
+        <dependency id="Win2D.uwp" version="1.23.0" />
     </dependencies>
   </metadata>
   <files>
@@ -22,18 +22,18 @@
       <file target="build\native\Robmikh.CompositionSurfaceFactory.props" src="CompositionSurfaceFactory.props" />
 
       <file target="lib\uap10.0" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.winmd" />
-      <file target="lib\uap10.0\Robmikh.CompositionSurfaceFactory.xml" src="Release\CompositionSurfaceFactory\CompositionSurfaceFactory.xml" />
+      <file target="lib\uap10.0\Robmikh.CompositionSurfaceFactory.xml" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.xml" />
 
-      <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.dll" src="ARM\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
+      <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.dll" src="ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-arm\native" src="ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
-      <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.pdb" src="ARM\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.pdb" />
+      <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.pdb" src="ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pdb" />
 
-      <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.dll" src="Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
+      <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.dll" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-x86\native" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
-      <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.pdb" src="Release\CompositionSurfaceFactory\CompositionSurfaceFactory.pdb" />
+      <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.pdb" src="Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pdb" />
 
-      <file target="runtimes\win10-x64\native\Robmikh.CompositionSurfaceFactory.dll" src="x64\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.dll" />
+      <file target="runtimes\win10-x64\native\Robmikh.CompositionSurfaceFactory.dll" src="x64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-x64\native" src="x64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
-      <file target="runtimes\win10-x64\native\Robmikh.CompositionSurfaceFactory.pdb" src="x64\Release\CompositionSurfaceFactory\CompositionSurfaceFactory.pdb" />
+      <file target="runtimes\win10-x64\native\Robmikh.CompositionSurfaceFactory.pdb" src="x64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pdb" />
   </files>
 </package>

@@ -1,37 +1,27 @@
-#pragma once
+﻿#pragma once
 
-namespace Robmikh
-{
-namespace CompositionSurfaceFactory
-{
-	ref class LockSession;
+#include "Lock.g.h"
 
-    public ref class Lock sealed
+namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
+{
+    struct Lock : LockT<Lock>
     {
-    public:
-        Lock();
+        Lock() { InitializeCriticalSection(&m_criticalSection); }
+        ~Lock() { DeleteCriticalSection(&m_criticalSection); }
 
-		LockSession^ GetLockSession();
-	internal:
-		void LockInternal();
-		void UnlockInternal();
+        Robmikh::CompositionSurfaceFactory::LockSession GetLockSession();
+
+        void LockInternal() { EnterCriticalSection(&m_criticalSection); }
+        void UnlockInternal() { LeaveCriticalSection(&m_criticalSection); }
+
     private:
-		~Lock();
-	private:
-		CRITICAL_SECTION m_criticalSection;
+        CRITICAL_SECTION m_criticalSection;
     };
-
-	public ref class LockSession sealed
-	{
-	internal:
-		LockSession(Lock^ lock);
-	public:
-		virtual ~LockSession();
-	private:
-		Lock^ m_lock;
-#if DEBUG
-		static long s_lockCount;
-#endif
-	};
 }
+
+namespace winrt::Robmikh::CompositionSurfaceFactory::factory_implementation
+{
+    struct Lock : LockT<Lock, implementation::Lock>
+    {
+    };
 }

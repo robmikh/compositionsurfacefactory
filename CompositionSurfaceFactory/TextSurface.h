@@ -1,254 +1,86 @@
-#pragma once
+﻿#pragma once
 
-namespace Robmikh
+#include "TextSurface.g.h"
+
+namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
 {
-namespace CompositionSurfaceFactory
-{
-    [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-    public ref class TextSurfaceRedrawnEventArgs sealed
+    struct TextSurface : TextSurfaceT<TextSurface>
     {
-    public :
-        property TextSurface^ Surface
-        {
-            TextSurface^ get() { return m_surface; }
-        }
+        TextSurface(
+            API::SurfaceFactory const& surfaceFactory,
+            hstring const& text,
+            float width,
+            float height,
+            hstring const& fontFamily,
+            float fontSize,
+            Windows::UI::Text::FontStyle const& fontStyle,
+            API::TextHorizontalAlignment const& horizontalAlignment,
+            API::TextVerticalAlignment const& verticalAlignment,
+            API::WordWrapping const& wordWrapping,
+            API::Padding const& padding,
+            Windows::UI::Color const& foregroundColor,
+            Windows::UI::Color const& backgroundColor);
+        ~TextSurface() { Close(); }
 
-        property SurfaceFactory^ SurfaceFactory
-        {
-            CompositionSurfaceFactory::SurfaceFactory^ get() { return m_surfaceFactory; }
-        }
-    internal:
-        static TextSurfaceRedrawnEventArgs^ Create(TextSurface^ surface, CompositionSurfaceFactory::SurfaceFactory^ surfaceFactory);
-    private:
-        TextSurfaceRedrawnEventArgs(TextSurface^ surface, CompositionSurfaceFactory::SurfaceFactory^ surfaceFactory);
-
-        TextSurface^ m_surface;
-        CompositionSurfaceFactory::SurfaceFactory^ m_surfaceFactory;
-    };
-
-    [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-    public ref class TextSurface sealed
-    {
-    public:
-        property Compositor^ Compositor { WUC::Compositor^ get() { return m_surfaceFactory->Compositor; } }
-        property SurfaceFactory^ SurfaceFactory { CompositionSurfaceFactory::SurfaceFactory^ get() { return m_surfaceFactory; }}
-        property ICompositionSurface^ Surface { ICompositionSurface^ get() { return m_surface; }}
-        property Size Size
-        {
-            WF::Size get()
-            {
-                if (m_surface != nullptr)
-                {
-                    return m_surface->Size;
-                }
-                else
-                {
-                    return Windows::Foundation::Size::Empty;
-                }
-            }
-        }
-
-        property Platform::String^ Text
-        {
-            Platform::String^ get() { return m_text; }
-            void set(Platform::String^ value)
-            {
-                m_text = value;
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property float Width
-        {
-            float get() { return m_width; };
-            void set(float value)
-            {
-                m_width = value;
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property float Height
-        {
-            float get() { return m_height; }
-            void set(float value)
-            {
-                m_height = value;
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property Platform::String^ FontFamily
-        {
-            Platform::String^ get() { return m_textFormat->FontFamily; }
-            void set(Platform::String^ value)
-            {
-                m_textFormat->FontFamily = value;
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property float FontSize
-        {
-            float get() { return m_textFormat->FontSize; }
-            void set(float value)
-            {
-                m_textFormat->FontSize = value;
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property FontStyle FontStyle
-        {
-            WUT::FontStyle get() { return m_textFormat->FontStyle; }
-            void set(WUT::FontStyle value)
-            {
-                m_textFormat->FontStyle = value;
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property TextHorizontalAlignment HorizontalAlignment
-        {
-            TextHorizontalAlignment get() { return GetTextHorizontalAlignment(m_textFormat->HorizontalAlignment); }
-            void set(TextHorizontalAlignment value)
-            {
-                m_textFormat->HorizontalAlignment = GetCanvasHorizontalAlignment(value);
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property TextVerticalAlignment VerticalAlignment
-        {
-            TextVerticalAlignment get() { return GetTextVerticalAlignment(m_textFormat->VerticalAlignment); }
-            void set(TextVerticalAlignment value)
-            {
-                m_textFormat->VerticalAlignment = GetCanvasVerticalAlignment(value);
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property WordWrapping WordWrapping
-        {
-            CompositionSurfaceFactory::WordWrapping get() { return GetWordWrapping(m_textFormat->WordWrapping); }
-            void set(CompositionSurfaceFactory::WordWrapping value)
-            {
-                m_textFormat->WordWrapping = GetCanvasWordWrapping(value);
-                UpdateTextLayout();
-                RedrawSurface();
-            }
-        }
-
-        property Padding Padding
-        {
-            CompositionSurfaceFactory::Padding get() { return m_padding; }
-            void set(CompositionSurfaceFactory::Padding value)
-            {
-                m_padding = value;
-                RedrawSurface();
-            }
-        }
-
-        property Windows::UI::Color ForegroundColor
-        {
-            Windows::UI::Color get() { return m_foregroundColor; }
-            void set(Windows::UI::Color value)
-            {
-                m_foregroundColor = value;
-                RedrawSurface();
-            }
-        }
-
-        property Windows::UI::Color BackgroundColor
-        {
-            Windows::UI::Color get() { return m_backgroundColor; }
-            void set(Windows::UI::Color value)
-            {
-                m_backgroundColor = value;
-                RedrawSurface();
-            }
-        }
-
+        Windows::UI::Composition::Compositor Compositor() { CheckClosed(); return m_surfaceFactory.Compositor(); }
+        Robmikh::CompositionSurfaceFactory::SurfaceFactory SurfaceFactory() { CheckClosed(); return m_surfaceFactory; }
+        Windows::UI::Composition::ICompositionSurface Surface() { CheckClosed(); return m_surface; }
+        Windows::Foundation::Size Size() { CheckClosed(); return m_surface == nullptr ? Windows::Foundation::Size{ 0, 0 } : m_surface.Size(); }
+        hstring Text() { CheckClosed(); return m_text; }
+        void Text(hstring const& value) { CheckClosed(); m_text = value; UpdateTextLayout(); RedrawSurface(); }
+        float Width() { CheckClosed(); return m_width; }
+        void Width(float value) { CheckClosed(); m_width = value; UpdateTextLayout(); RedrawSurface(); }
+        float Height() { CheckClosed(); return m_height; }
+        void Height(float value) { CheckClosed(); m_height = value; UpdateTextLayout(); RedrawSurface(); }
+        hstring FontFamily() { CheckClosed(); return m_textFormat.FontFamily(); }
+        void FontFamily(hstring const& value) { CheckClosed(); m_textFormat.FontFamily(value); UpdateTextLayout(); RedrawSurface(); }
+        float FontSize() { CheckClosed(); return m_textFormat.FontSize(); }
+        void FontSize(float value) { CheckClosed(); m_textFormat.FontSize(value); UpdateTextLayout(); RedrawSurface(); }
+        Windows::UI::Text::FontStyle FontStyle() { CheckClosed(); return m_textFormat.FontStyle(); }
+        void FontStyle(Windows::UI::Text::FontStyle const& value) { CheckClosed(); m_textFormat.FontStyle(value); UpdateTextLayout(); RedrawSurface(); }
+        Robmikh::CompositionSurfaceFactory::TextHorizontalAlignment HorizontalAlignment() { CheckClosed(); return static_cast<API::TextHorizontalAlignment>(m_textFormat.HorizontalAlignment()); }
+        void HorizontalAlignment(Robmikh::CompositionSurfaceFactory::TextHorizontalAlignment const& value) { CheckClosed(); m_textFormat.HorizontalAlignment(static_cast<Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment>(value)); UpdateTextLayout(); RedrawSurface(); }
+        Robmikh::CompositionSurfaceFactory::TextVerticalAlignment VerticalAlignment() { CheckClosed(); return static_cast<API::TextVerticalAlignment>(m_textFormat.VerticalAlignment()); }
+        void VerticalAlignment(Robmikh::CompositionSurfaceFactory::TextVerticalAlignment const& value) { CheckClosed(); m_textFormat.VerticalAlignment(static_cast<Microsoft::Graphics::Canvas::Text::CanvasVerticalAlignment>(value)); UpdateTextLayout(); RedrawSurface(); }
+        Robmikh::CompositionSurfaceFactory::WordWrapping WordWrapping() { CheckClosed(); return static_cast<API::WordWrapping>(m_textFormat.WordWrapping()); }
+        void WordWrapping(Robmikh::CompositionSurfaceFactory::WordWrapping const& value) { CheckClosed(); m_textFormat.WordWrapping(static_cast<Microsoft::Graphics::Canvas::Text::CanvasWordWrapping>(value)); UpdateTextLayout(); RedrawSurface(); }
+        Robmikh::CompositionSurfaceFactory::Padding Padding() { CheckClosed(); return m_padding; }
+        void Padding(Robmikh::CompositionSurfaceFactory::Padding const& value) { CheckClosed(); m_padding = value; RedrawSurface(); }
+        Windows::UI::Color ForegroundColor() { CheckClosed(); return m_foregroundColor; }
+        void ForegroundColor(Windows::UI::Color const& value) { CheckClosed(); m_foregroundColor = value; RedrawSurface(); }
+        Windows::UI::Color BackgroundColor() { CheckClosed(); return m_backgroundColor; }
+        void BackgroundColor(Windows::UI::Color const& value) { CheckClosed(); m_backgroundColor = value; RedrawSurface(); }
         void RedrawSurface();
-        event EventHandler<TextSurfaceRedrawnEventArgs^>^ SurfaceRedrawn;
+        winrt::event_token SurfaceRedrawn(Windows::Foundation::EventHandler<Robmikh::CompositionSurfaceFactory::TextSurfaceRedrawnEventArgs> const& handler) { return m_surfaceRedrawnEvent.add(handler); }
+        void SurfaceRedrawn(winrt::event_token const& token) noexcept { m_surfaceRedrawnEvent.remove(token); }
+        void Close();
 
-        virtual ~TextSurface();
     private:
-        static CanvasHorizontalAlignment GetCanvasHorizontalAlignment(TextHorizontalAlignment value);
-        static TextHorizontalAlignment GetTextHorizontalAlignment(CanvasHorizontalAlignment value);
-        static CanvasVerticalAlignment GetCanvasVerticalAlignment(TextVerticalAlignment value);
-        static TextVerticalAlignment GetTextVerticalAlignment(CanvasVerticalAlignment value);
-        static CanvasWordWrapping GetCanvasWordWrapping(CompositionSurfaceFactory::WordWrapping value);
-        static CompositionSurfaceFactory::WordWrapping GetWordWrapping(CanvasWordWrapping value);
+        void CheckClosed()
+        {
+            if (m_closed.load() == true)
+            {
+                throw hresult_error(RO_E_CLOSED);
+            }
+        }
 
-        TextSurface(CompositionSurfaceFactory::SurfaceFactory^ surfaceFactory, 
-                    Platform::String^ text);
-        TextSurface(CompositionSurfaceFactory::SurfaceFactory^ surfaceFactory,
-                    Platform::String^ text,
-                    float width,
-                    float height,
-                    Platform::String^ fontFamily,
-                    float fontSize,
-                    WUT::FontStyle fontStyle,
-                    TextHorizontalAlignment horizontalAlignment,
-                    TextVerticalAlignment verticalAlignment,
-                    CompositionSurfaceFactory::WordWrapping wordWrapping,
-                    CompositionSurfaceFactory::Padding padding,
-                    Windows::UI::Color foregroundColor,
-                    Windows::UI::Color backgroundColor);
-
-        void Initialize(float width,
-                        float height,
-                        Platform::String^ fontFamily,
-                        float fontSize,
-                        WUT::FontStyle fontStyle,
-                        TextHorizontalAlignment horizontalAlignment,
-                        TextVerticalAlignment verticalAlignment,
-                        CompositionSurfaceFactory::WordWrapping wordWrapping,
-                        CompositionSurfaceFactory::Padding padding,
-                        Windows::UI::Color foregroundColor,
-                        Windows::UI::Color backgroundColor);
-        void Uninitialize();
-
-        void OnDeviceReplacedEvent(Platform::Object ^sender, Windows::UI::Composition::RenderingDeviceReplacedEventArgs ^args);
         void UpdateTextLayout();
-    internal:
-        static TextSurface^ Create(CompositionSurfaceFactory::SurfaceFactory^ surfaceFactory,
-                                   Platform::String^ text);
-        static TextSurface^ Create(CompositionSurfaceFactory::SurfaceFactory^ surfaceFactory,
-                                   Platform::String^ text,
-                                   float width,
-                                   float height,
-                                   Platform::String^ fontFamily,
-                                   float fontSize,
-                                   WUT::FontStyle fontStyle,
-                                   TextHorizontalAlignment horizontalAlignment,
-                                   TextVerticalAlignment verticalAlignment,
-                                   CompositionSurfaceFactory::WordWrapping wordWrapping,
-                                   CompositionSurfaceFactory::Padding padding,
-                                   Windows::UI::Color foregroundColor,
-                                   Windows::UI::Color backgroundColor);
+        void OnDeviceReplaced(winrt::Windows::Foundation::IInspectable const& sender, Windows::UI::Composition::RenderingDeviceReplacedEventArgs const& args);
+
     private:
-        CompositionSurfaceFactory::SurfaceFactory^ m_surfaceFactory;
-        CompositionDrawingSurface^ m_surface;
-        Platform::String^ m_text;
+        API::SurfaceFactory m_surfaceFactory{ nullptr };
+        Windows::UI::Composition::CompositionDrawingSurface m_surface{ nullptr };
+        hstring m_text;
         float m_width;
         float m_height;
-        CanvasTextFormat^ m_textFormat;
-        CompositionSurfaceFactory::Padding m_padding;
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat m_textFormat;
+        API::Padding m_padding;
         Windows::UI::Color m_foregroundColor;
         Windows::UI::Color m_backgroundColor;
-        CanvasTextLayout^ m_textLayout;
+        Microsoft::Graphics::Canvas::Text::CanvasTextLayout m_textLayout{ nullptr };
 
-		Windows::Foundation::EventRegistrationToken OnDeviceReplacedHandler;
+        winrt::event<Windows::Foundation::EventHandler<Robmikh::CompositionSurfaceFactory::TextSurfaceRedrawnEventArgs>> m_surfaceRedrawnEvent;
+        API::SurfaceFactory::DeviceReplaced_revoker m_deviceReplaced;
+        std::atomic<bool> m_closed = false;
     };
-}
 }

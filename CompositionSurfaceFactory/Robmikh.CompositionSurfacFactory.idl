@@ -1,0 +1,199 @@
+namespace Robmikh.CompositionSurfaceFactory
+{
+    enum InterpolationMode
+    {
+        NearestNeighbor = 0,
+        Linear = 1,
+        Cubic = 2,
+        MultiSampleLinear = 3,
+        Anisotropic = 4,
+        HighQualityCubic = 5,
+    };
+
+    enum TextHorizontalAlignment
+    {
+        Left = 0,
+        Right = 1,
+        Center = 2,
+        Justified = 3,
+    };
+
+    enum TextVerticalAlignment
+    {
+        Top = 0,
+        Bottom = 1,
+        Center = 2,
+    };
+
+    enum WordWrapping
+    {
+        Wrap = 0,
+        NoWrap = 1,
+        EmergencyBreak = 2,
+        WholeWord = 3,
+        Character = 4,
+    };
+
+    struct Padding
+    {
+        Single Left;
+        Single Right;
+        Single Top;
+        Single Bottom;
+    };
+
+    struct SurfaceFactoryOptions
+    {
+        Boolean UseSoftwareRenderer;
+    };
+
+    [interface_name("IDeviceLostEventArgs", FB1D2D1C-CC72-3058-8C0E-BD40EC3759B5)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    runtimeclass DeviceLostEventArgs
+    {
+        Windows.Graphics.DirectX.Direct3D11.IDirect3DDevice Device { get; };
+    }
+
+    [interface_name("IDeviceLostHelper", 5CE9D519-9F0B-32E1-9025-E903B349B635)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    [webhosthidden]
+    runtimeclass DeviceLostHelper
+    {
+        DeviceLostHelper();
+
+        Windows.Graphics.DirectX.Direct3D11.IDirect3DDevice CurrentlyWatchedDevice { get; };
+        void WatchDevice(Windows.Graphics.DirectX.Direct3D11.IDirect3DDevice device);
+        void StopWatchingCurrentDevice();
+        event Windows.Foundation.EventHandler<DeviceLostEventArgs> DeviceLost;
+    }
+
+    [interface_name("ILock", 4412292E-280C-3D29-AF11-EA4F54136126)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    runtimeclass Lock
+    {
+        Lock();
+
+        LockSession GetLockSession();
+    }
+
+    [interface_name("ILockSession", C3F6B3C7-5E1F-3B60-9D30-5D0FEBC72396)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    runtimeclass LockSession : Windows.Foundation.IClosable
+    {
+    }
+
+    [interface_name("ISurfaceFactory", 3745AC26-AD98-3890-83F7-77999B5393EA)]
+    [static_name("ISurfaceFactoryStatics", 327B01FD-AE20-37D1-9C6F-960EFA993CB1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    [webhosthidden]
+    runtimeclass SurfaceFactory : Windows.Foundation.IClosable
+    {
+        Windows.UI.Composition.Compositor Compositor { get; };
+        Windows.UI.Composition.CompositionGraphicsDevice GraphicsDevice { get; };
+        Lock DrawingLock { get; };
+        Windows.UI.Composition.CompositionDrawingSurface CreateSurface(Windows.Foundation.Size size);
+        void ResizeSurface(Windows.UI.Composition.CompositionDrawingSurface surface, Windows.Foundation.Size size);
+        [default_overload]
+        UriSurface CreateUriSurface();
+        UriSurface CreateUriSurface(Windows.Foundation.Uri uri);
+        UriSurface CreateUriSurface(Windows.Foundation.Uri uri, Windows.Foundation.Size size);
+        UriSurface CreateUriSurface(Windows.Foundation.Uri uri, Windows.Foundation.Size size, Robmikh.CompositionSurfaceFactory.InterpolationMode interpolation);
+        [default_overload]
+        Windows.Foundation.IAsyncOperation<UriSurface> CreateUriSurfaceAsync(Windows.Foundation.Uri uri);
+        Windows.Foundation.IAsyncOperation<UriSurface> CreateUriSurfaceAsync(Windows.Foundation.Uri uri, Windows.Foundation.Size size);
+        Windows.Foundation.IAsyncOperation<UriSurface> CreateUriSurfaceAsync(Windows.Foundation.Uri uri, Windows.Foundation.Size size, InterpolationMode interpolation);
+        [default_overload]
+        Robmikh.CompositionSurfaceFactory.TextSurface CreateTextSurface();
+        Robmikh.CompositionSurfaceFactory.TextSurface CreateTextSurface(String text);
+        Robmikh.CompositionSurfaceFactory.TextSurface CreateTextSurface(String text, Single width, Single height, String fontFamily, Single fontSize, Windows.UI.Text.FontStyle fontStyle, Robmikh.CompositionSurfaceFactory.TextHorizontalAlignment horizontalAlignment, Robmikh.CompositionSurfaceFactory.TextVerticalAlignment verticalAlignment, Robmikh.CompositionSurfaceFactory.WordWrapping wordWrapping, Robmikh.CompositionSurfaceFactory.Padding padding, Windows.UI.Color foregroundColor, Windows.UI.Color backgroundColor);
+        event Windows.Foundation.EventHandler<Windows.UI.Composition.RenderingDeviceReplacedEventArgs> DeviceReplaced;
+
+        static SurfaceFactory GetSharedSurfaceFactoryForCompositor(Windows.UI.Composition.Compositor compositor);
+        static void ClearSharedSurfaceFactories();
+        [default_overload]
+        static Robmikh.CompositionSurfaceFactory.SurfaceFactory CreateFromCompositor(Windows.UI.Composition.Compositor compositor);
+        static Robmikh.CompositionSurfaceFactory.SurfaceFactory CreateFromCompositor(Windows.UI.Composition.Compositor compositor, SurfaceFactoryOptions options);
+        [default_overload]
+        static SurfaceFactory CreateFromGraphicsDevice(Windows.UI.Composition.CompositionGraphicsDevice graphicsDevice);
+        static SurfaceFactory CreateFromGraphicsDevice(Windows.UI.Composition.CompositionGraphicsDevice graphicsDevice, Lock lock);
+    }
+
+    [interface_name("ISurfaceUtilities", 986C7CAC-619F-3A50-B83B-F039F575D397)]
+    [static_name("ISurfaceUtilitiesStatics", 8E2E7797-D524-349F-BE77-D9CA47565DD8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    runtimeclass SurfaceUtilities
+    {
+        static void FillSurfaceWithColor(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.UI.Color color, Windows.Foundation.Size size);
+        static void FillSurfaceWithColor(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.UI.Color color);
+        static void FillSurfaceWithDirect3DSurface(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface direct3DSurface, Windows.Foundation.Size size, Robmikh.CompositionSurfaceFactory.InterpolationMode interpolation);
+        static void FillSurfaceWithDirect3DSurface(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface direct3DSurface, Windows.Foundation.Size size);
+        static void FillSurfaceWithDirect3DSurface(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface direct3DSurface);
+        static Windows.Foundation.IAsyncAction FillSurfaceWithUriAsync(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.Foundation.Uri uri, Windows.Foundation.Size size, InterpolationMode interpolation);
+        static Windows.Foundation.IAsyncAction FillSurfaceWithUriAsync(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.Foundation.Uri uri, Windows.Foundation.Size size);
+        static Windows.Foundation.IAsyncAction FillSurfaceWithUriAsync(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, Windows.Foundation.Uri uri);
+        static void FillSurfaceWithBytes(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, UInt8[] bytes, Int32 widthInPixels, Int32 heightInPixels, Windows.Foundation.Size size, InterpolationMode interpolation);
+        static void FillSurfaceWithBytes(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, UInt8[] bytes, Int32 widthInPixels, Int32 heightInPixels, Windows.Foundation.Size size);
+        static void FillSurfaceWithBytes(SurfaceFactory surfaceFactory, Windows.UI.Composition.CompositionDrawingSurface surface, UInt8[] bytes, Int32 widthInPixels, Int32 heightInPixels);
+    }
+
+    [interface_name("ITextSurface", 1EF5CF55-3D43-3B2A-B824-A5BA5C988893)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    runtimeclass TextSurface : Windows.Foundation.IClosable
+    {
+        Windows.UI.Composition.Compositor Compositor { get; };
+        SurfaceFactory SurfaceFactory { get; };
+        Windows.UI.Composition.ICompositionSurface Surface { get; };
+        Windows.Foundation.Size Size { get; };
+        String Text;
+        Single Width;
+        Single Height;
+        String FontFamily;
+        Single FontSize;
+        Windows.UI.Text.FontStyle FontStyle;
+        TextHorizontalAlignment HorizontalAlignment;
+        TextVerticalAlignment VerticalAlignment;
+        WordWrapping WordWrapping;
+        Padding Padding;
+        Windows.UI.Color ForegroundColor;
+        Windows.UI.Color BackgroundColor;
+        void RedrawSurface();
+        event Windows.Foundation.EventHandler<TextSurfaceRedrawnEventArgs> SurfaceRedrawn;
+    }
+
+    [interface_name("ITextSurfaceRedrawnEventArgs", B9DD2DDF-1CEB-3E08-836C-F8B1557EA7BF)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    runtimeclass TextSurfaceRedrawnEventArgs
+    {
+        TextSurface Surface { get; };
+        SurfaceFactory SurfaceFactory { get; };
+    }
+
+    [interface_name("IUriSurface", 4B6164AC-053F-3B85-AC01-18D0906B1E41)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    runtimeclass UriSurface : Windows.Foundation.IClosable
+    {
+        Windows.UI.Composition.Compositor Compositor { get; };
+        SurfaceFactory SurfaceFactory { get; };
+        Windows.UI.Composition.ICompositionSurface Surface { get; };
+        Windows.Foundation.Uri Source { get; };
+        Windows.Foundation.Size Size { get; };
+        InterpolationMode InterpolationMode { get; };
+        [default_overload]
+        Windows.Foundation.IAsyncAction RedrawSurfaceAsync();
+        Windows.Foundation.IAsyncAction RedrawSurfaceAsync(Windows.Foundation.Uri uri);
+        Windows.Foundation.IAsyncAction RedrawSurfaceAsync(Windows.Foundation.Uri uri, Windows.Foundation.Size size);
+        Windows.Foundation.IAsyncAction RedrawSurfaceAsync(Windows.Foundation.Uri uri, Windows.Foundation.Size size, InterpolationMode interpolation);
+        void Resize(Windows.Foundation.Size size);
+    }
+
+
+}

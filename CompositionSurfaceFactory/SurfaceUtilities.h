@@ -1,124 +1,34 @@
-#pragma once
-#include "SurfaceFactory.h"
+﻿#pragma once
 
-namespace Robmikh
+#include "SurfaceUtilities.g.h"
+
+namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
 {
-namespace CompositionSurfaceFactory
-{
-	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-	public ref class SurfaceUtilities sealed
-	{
-	public:
-		static void FillSurfaceWithColor(
-			SurfaceFactory^ surfaceFactory, 
-			CompositionDrawingSurface^ surface, 
-			Windows::UI::Color color, 
-			Size size);
+    struct SurfaceUtilities : SurfaceUtilitiesT<SurfaceUtilities>
+    {
+        SurfaceUtilities() = delete;
 
-		static void FillSurfaceWithDirect3DSurface(
-			SurfaceFactory^ surfaceFactory, 
-			CompositionDrawingSurface^ surface, 
-			IDirect3DSurface^ direct3DSurface, 
-			Size size, 
-			InterpolationMode interpolation);
 
-		static IAsyncAction^ FillSurfaceWithUriAsync(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			Uri^ uri,
-			Size size,
-			InterpolationMode interpolation);
+        static void FillSurfaceWithColor(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Windows::UI::Color const& color, Windows::Foundation::Size const& size);
+        static void FillSurfaceWithColor(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Windows::UI::Color const& color);
+        static void FillSurfaceWithDirect3DSurface(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Windows::Graphics::DirectX::Direct3D11::IDirect3DSurface const& direct3DSurface, Windows::Foundation::Size const& size, Robmikh::CompositionSurfaceFactory::InterpolationMode const& interpolation);
+        static void FillSurfaceWithDirect3DSurface(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Windows::Graphics::DirectX::Direct3D11::IDirect3DSurface const& direct3DSurface, Windows::Foundation::Size const& size);
+        static void FillSurfaceWithDirect3DSurface(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Windows::Graphics::DirectX::Direct3D11::IDirect3DSurface const& direct3DSurface);
+        static Windows::Foundation::IAsyncAction FillSurfaceWithUriAsync(Robmikh::CompositionSurfaceFactory::SurfaceFactory const surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const surface, Windows::Foundation::Uri const uri, Windows::Foundation::Size const size, Robmikh::CompositionSurfaceFactory::InterpolationMode const interpolation);
+        static Windows::Foundation::IAsyncAction FillSurfaceWithUriAsync(Robmikh::CompositionSurfaceFactory::SurfaceFactory const surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const surface, Windows::Foundation::Uri const uri, Windows::Foundation::Size const size);
+        static Windows::Foundation::IAsyncAction FillSurfaceWithUriAsync(Robmikh::CompositionSurfaceFactory::SurfaceFactory const surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const surface, Windows::Foundation::Uri const uri);
+        static void FillSurfaceWithBytes(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, array_view<uint8_t const> bytes, int32_t widthInPixels, int32_t heightInPixels, Windows::Foundation::Size const& size, Robmikh::CompositionSurfaceFactory::InterpolationMode const& interpolation);
+        static void FillSurfaceWithBytes(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, array_view<uint8_t const> bytes, int32_t widthInPixels, int32_t heightInPixels, Windows::Foundation::Size const& size);
+        static void FillSurfaceWithBytes(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, array_view<uint8_t const> bytes, int32_t widthInPixels, int32_t heightInPixels);
 
-		static void FillSurfaceWithBytes(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			const Platform::Array<byte>^ bytes,
-			int widthInPixels,
-			int heightInPixels,
-			Size size,
-			InterpolationMode interpolation);
-
-		//
-		// Overloads
-		//
-
-		// FillSurfaceWithColor
-		static void FillSurfaceWithColor(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			Windows::UI::Color color)
-		{
-			FillSurfaceWithColor(surfaceFactory, surface, color, Size::Empty);
-		}
-
-		// FillSurfaceWithDirect3DSurface
-		static void FillSurfaceWithDirect3DSurface(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			IDirect3DSurface^ direct3DSurface,
-			Size size)
-		{
-			FillSurfaceWithDirect3DSurface(surfaceFactory, surface, direct3DSurface, size, InterpolationMode::Linear);
-		}
-
-		static void FillSurfaceWithDirect3DSurface(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			IDirect3DSurface^ direct3DSurface)
-		{
-			FillSurfaceWithDirect3DSurface(surfaceFactory, surface, direct3DSurface, Size::Empty);
-		}
-
-		// FillSurfaceWithUriAsync
-		static IAsyncAction^ FillSurfaceWithUriAsync(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			Uri^ uri,
-			Size size)
-		{
-			return FillSurfaceWithUriAsync(surfaceFactory, surface, uri, size, InterpolationMode::Linear);
-		}
-
-		static IAsyncAction^ FillSurfaceWithUriAsync(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			Uri^ uri)
-		{
-			return FillSurfaceWithUriAsync(surfaceFactory, surface, uri, Size::Empty);
-		}
-
-		// FillSurfaceWithBytes
-		static void FillSurfaceWithBytes(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			const Platform::Array<byte>^ bytes,
-			int widthInPixels,
-			int heightInPixels,
-			Size size)
-		{
-			FillSurfaceWithBytes(surfaceFactory, surface, bytes, widthInPixels, heightInPixels, size, InterpolationMode::Linear);
-		}
-
-		static void FillSurfaceWithBytes(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			const Platform::Array<byte>^ bytes,
-			int widthInPixels,
-			int heightInPixels)
-		{
-			FillSurfaceWithBytes(surfaceFactory, surface, bytes, widthInPixels, heightInPixels, Size::Empty);
-		}
-
-	internal:
-		static void FillSurfaceWithCanvasBitmap(
-			SurfaceFactory^ surfaceFactory,
-			CompositionDrawingSurface^ surface,
-			CanvasBitmap^ bitmap,
-			Size size,
-			InterpolationMode interpolation);
-
-	private:
-		SurfaceUtilities();
-	};
+    private:
+        static void FillSurfaceWithCanvasBitmap(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Microsoft::Graphics::Canvas::CanvasBitmap const& bitmap, Windows::Foundation::Size const& size, Robmikh::CompositionSurfaceFactory::InterpolationMode const& interpolation);
+    };
 }
+
+namespace winrt::Robmikh::CompositionSurfaceFactory::factory_implementation
+{
+    struct SurfaceUtilities : SurfaceUtilitiesT<SurfaceUtilities, implementation::SurfaceUtilities>
+    {
+    };
 }

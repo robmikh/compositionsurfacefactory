@@ -1,95 +1,100 @@
-#include "pch.h"
-#include "SurfaceFactory.h"
+﻿#include "pch.h"
 #include "UriSurface.h"
-#include "Lock.h"
 #include "SurfaceUtilities.h"
 
-using namespace Robmikh::CompositionSurfaceFactory;
-using namespace Platform;
+using namespace winrt;
+using namespace Windows::Foundation;
+using namespace Windows::UI;
+using namespace Windows::UI::Composition;
 
-namespace CSF = Robmikh::CompositionSurfaceFactory;
-
-UriSurface^ UriSurface::Create(
-    CSF::SurfaceFactory^ surfaceFactory,
-    Uri^ uri,
-    WF::Size size,
-    CSF::InterpolationMode interpolation)
+namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
 {
-    return ref new UriSurface(surfaceFactory, uri, size, interpolation);
-}
+    UriSurface::UriSurface(
+        API::SurfaceFactory const& surfaceFactory,
+        Uri const& uri,
+        Windows::Foundation::Size const size,
+        API::InterpolationMode const interpolation)
+    {
+        m_surfaceFactory = surfaceFactory;
+        m_uri = uri;
+        m_size = size;
+        m_interpolationMode = interpolation;
 
-UriSurface::UriSurface(
-    CSF::SurfaceFactory^ surfaceFactory,
-    Uri^ uri, 
-    WF::Size size,
-    CSF::InterpolationMode interpolation) : 
-    m_surfaceFactory(surfaceFactory), 
-    m_uri(uri),
-    m_interpolationMode(interpolation),
-    m_desiredSize(size)
-{
-    m_surface = m_surfaceFactory->CreateSurface(m_desiredSize);
+        m_surface = m_surfaceFactory.CreateSurface(m_size);
+        m_deviceReplaced = m_surfaceFactory.DeviceReplaced(auto_revoke, { this, &UriSurface::OnDeviceReplaced });
+    }
 
-    OnDeviceReplacedHandler = 
-        m_surfaceFactory->DeviceReplaced += 
-            ref new EventHandler<RenderingDeviceReplacedEventArgs ^>(this, &UriSurface::OnDeviceReplacedEvent);
-}
+    Windows::Foundation::Size UriSurface::Size()
+    {
+        CheckClosed();
+        if (m_surface != nullptr)
+        {
+            return m_surface.Size();
+        }
+        else
+        {
+            return { 0, 0 };
+        }
+    }
 
-UriSurface::~UriSurface()
-{
-    Uninitialize();
-}
+    Windows::Foundation::IAsyncAction UriSurface::RedrawSurfaceAsync()
+    {
+        CheckClosed();
+        co_await RedrawSurfaceAsync(m_uri);
+    }
 
-void UriSurface::OnDeviceReplacedEvent(Object ^sender, RenderingDeviceReplacedEventArgs ^args)
-{
-    OutputDebugString(L"CompositionSurfaceFactory - Redrawing UriSurface from Device Replaced");
-    auto ignored = RedrawSurfaceAsync();
-}
+    Windows::Foundation::IAsyncAction UriSurface::RedrawSurfaceAsync(Windows::Foundation::Uri const uri)
+    {
+        CheckClosed();
+        co_await RedrawSurfaceAsync(m_uri, m_size);
+    }
 
-IAsyncAction^ UriSurface::RedrawSurfaceAsync()
-{
-    return RedrawSurfaceAsync(m_uri);
-}
+    Windows::Foundation::IAsyncAction UriSurface::RedrawSurfaceAsync(Windows::Foundation::Uri const uri, Windows::Foundation::Size const size)
+    {
+        CheckClosed();
+        co_await RedrawSurfaceAsync(m_uri, m_size, m_interpolationMode);
+    }
 
-IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri)
-{
-    return RedrawSurfaceAsync(uri, m_desiredSize);
-}
+    Windows::Foundation::IAsyncAction UriSurface::RedrawSurfaceAsync(Windows::Foundation::Uri const uri, Windows::Foundation::Size const size, Robmikh::CompositionSurfaceFactory::InterpolationMode const interpolation)
+    {
+        CheckClosed();
+        m_uri = uri;
+        m_interpolationMode = interpolation;
+        m_size = size;
 
-IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri, WF::Size size)
-{
-    return RedrawSurfaceAsync(uri, size, m_interpolationMode);
-}
+        if (m_uri != nullptr)
+        {
+            co_await implementation::SurfaceUtilities::FillSurfaceWithUriAsync(m_surfaceFactory, m_surface, m_uri, m_size, m_interpolationMode);
+        }
+        else
+        {
+            implementation::SurfaceUtilities::FillSurfaceWithColor(m_surfaceFactory, m_surface, Colors::Transparent(), m_size);
+        }
+    }
 
-IAsyncAction^ UriSurface::RedrawSurfaceAsync(Uri^ uri, WF::Size size, CSF::InterpolationMode interpolation)
-{
-	m_uri = uri;
-	m_interpolationMode = interpolation;
-    m_desiredSize = size;
+    void UriSurface::Resize(Windows::Foundation::Size const& size)
+    {
+        CheckClosed();
+        m_surfaceFactory.ResizeSurface(m_surface, size);
+    }
 
-	if (m_uri != nullptr)
-	{
-		return SurfaceUtilities::FillSurfaceWithUriAsync(m_surfaceFactory, m_surface, m_uri, m_desiredSize, m_interpolationMode);
-	}
-	else
-	{
-		return concurrency::create_async([=]()
-		{
-			SurfaceUtilities::FillSurfaceWithColor(m_surfaceFactory, m_surface, Windows::UI::Colors::Transparent, m_desiredSize);
-		});
-	}
-}
+    void UriSurface::Close()
+    {
+        auto expected = false;
+        if (m_closed.compare_exchange_strong(expected, true))
+        {
+            m_deviceReplaced.revoke();
+            m_surface.Close();
+            m_surface = nullptr;
+            m_surfaceFactory = nullptr;
+            m_uri = nullptr;
+        }
+    }
 
-void UriSurface::Resize(WF::Size size)
-{
-	m_surfaceFactory->ResizeSurface(m_surface, size);
-}
-
-void UriSurface::Uninitialize()
-{
-    m_surfaceFactory->DeviceReplaced -= OnDeviceReplacedHandler;
-    m_surface->~CompositionDrawingSurface();
-    m_surface = nullptr;
-    m_surfaceFactory = nullptr;
-    m_uri = nullptr;
+    fire_and_forget UriSurface::OnDeviceReplaced(
+        winrt::Windows::Foundation::IInspectable const&, 
+        RenderingDeviceReplacedEventArgs const& args)
+    {
+        co_await RedrawSurfaceAsync();
+    }
 }

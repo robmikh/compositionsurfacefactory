@@ -1,34 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Resources">
-      <UniqueIdentifier>8897ec97-f97c-4067-9966-5886f713973f</UniqueIdentifier>
+      <UniqueIdentifier>accd3aa8-1ba0-4223-9bbe-0c431709210b</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tga;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{926ab91d-31b4-48c3-b9a4-e681349f27f0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="SurfaceFactory.cpp" />
-    <ClCompile Include="TextSurface.cpp" />
-    <ClCompile Include="UriSurface.cpp" />
+    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="Robmikh.CompositionSurfacFactory.cpp" />
+    <ClCompile Include="DeviceLostEventArgs.cpp" />
     <ClCompile Include="DeviceLostHelper.cpp" />
     <ClCompile Include="Lock.cpp" />
+    <ClCompile Include="LockSession.cpp" />
+    <ClCompile Include="SurfaceFactory.cpp" />
     <ClCompile Include="SurfaceUtilities.cpp" />
+    <ClCompile Include="TextSurface.cpp" />
+    <ClCompile Include="TextSurfaceRedrawnEventArgs.cpp" />
+    <ClCompile Include="UriSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SurfaceFactory.h" />
-    <ClInclude Include="TextSurface.h" />
-    <ClInclude Include="TextSurfaceEnums.h" />
-    <ClInclude Include="UriSurface.h" />
-    <ClInclude Include="SurfaceFactoryOptions.h" />
-    <ClInclude Include="ImageEnums.h" />
+    <ClInclude Include="Robmikh.CompositionSurfacFactory.h" />
+    <ClInclude Include="DeviceLostEventArgs.h" />
     <ClInclude Include="DeviceLostHelper.h" />
     <ClInclude Include="Lock.h" />
+    <ClInclude Include="LockSession.h" />
+    <ClInclude Include="SurfaceFactory.h" />
     <ClInclude Include="SurfaceUtilities.h" />
+    <ClInclude Include="TextSurface.h" />
+    <ClInclude Include="TextSurfaceRedrawnEventArgs.h" />
+    <ClInclude Include="UriSurface.h" />
+    <ClInclude Include="direct3d11.interop.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="VERSION" />
+    <None Include="Robmikh.CompositionSurfaceFactory.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="Robmikh.CompositionSurfacFactory.idl" />
   </ItemGroup>
 </Project>
