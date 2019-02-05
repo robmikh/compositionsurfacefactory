@@ -186,7 +186,6 @@
   <ItemGroup>
     <None Include="Robmikh.CompositionSurfaceFactory.def" />
     <None Include="packages.config" />
-    <None Include="VERSION" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

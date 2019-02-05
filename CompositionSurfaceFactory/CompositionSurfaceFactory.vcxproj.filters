@@ -38,7 +38,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Robmikh.CompositionSurfaceFactory.def" />
-    <None Include="VERSION" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Robmikh.CompositionSurfacFactory.idl" />
