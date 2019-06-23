@@ -64,8 +64,12 @@ namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
         {
             auto lockSession = lock.GetLockSession();
             
-            float width = m_textLayout.DrawBounds().Width + m_padding.Left + m_padding.Right;
-            float height = m_textLayout.DrawBounds().Height + m_padding.Top + m_padding.Bottom;
+            // I thought it should be:
+            //float width = m_textLayout.DrawBounds().Width + m_padding.Left + m_padding.Right;
+            //float height = m_textLayout.DrawBounds().Height + m_padding.Top + m_padding.Bottom;
+            // But it needs to be:
+            float width = m_textLayout.DrawBounds().X + m_textLayout.DrawBounds().Width + m_padding.Left + m_padding.Right;
+            float height = m_textLayout.DrawBounds().Y + m_textLayout.DrawBounds().Height + m_padding.Top + m_padding.Bottom;
             // The surface can't have any dimmension be 0, so make it at least 1.0f
             if (width < 1.0f)
             {

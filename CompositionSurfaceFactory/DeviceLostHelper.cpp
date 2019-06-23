@@ -25,7 +25,7 @@ namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
         OnDeviceLostHandler = CreateThreadpoolWait(DeviceLostHelper::OnDeviceLost, (PVOID)this, NULL);
 
         // Create a handle and a cookie
-        m_eventHandle = CreateEvent(NULL, FALSE, FALSE, L"DeviceLost");
+        m_eventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
         m_cookie = NULL;
 
         // Register for device lost
