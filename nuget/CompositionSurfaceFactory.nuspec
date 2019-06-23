@@ -12,6 +12,10 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>CompositionSurfaceFactory is a surface factory intended for use with the Windows.UI.Composition API based on Win2D and written with C++/WinRT. Automatic image loading and text.</description>
     <releaseNotes>Release notes:
+Version 0.8.2:
+* Minor fixes to C++/WinRT version
+* First C++/WinRT-based release!
+
 Version 0.8.1-prerelease:
 * Switch release mechanism (no code change)
 
