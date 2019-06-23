@@ -1,52 +1,37 @@
-#pragma once
+﻿#pragma once
 
-namespace Robmikh
+#include "DeviceLostHelper.g.h"
+
+namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
 {
-namespace CompositionSurfaceFactory
-{
-	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-	public ref class DeviceLostEventArgs sealed
-	{
-	public:
-		property IDirect3DDevice^ Device
-		{
-			IDirect3DDevice^ get() { return m_device; }
-		}
+    struct DeviceLostHelper : DeviceLostHelperT<DeviceLostHelper>
+    {
+        DeviceLostHelper() = default;
+        ~DeviceLostHelper() { StopWatchingCurrentDevice(); OnDeviceLostHandler = NULL; }
 
-	internal:
-		static DeviceLostEventArgs^ Create(IDirect3DDevice^ device) { return ref new DeviceLostEventArgs(device); }
-	private:
-		DeviceLostEventArgs(IDirect3DDevice^ device) : m_device(device) {}
+        Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice CurrentlyWatchedDevice() { return m_device; }
+        void WatchDevice(Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice const& device);
+        void StopWatchingCurrentDevice();
+        winrt::event_token DeviceLost(Windows::Foundation::EventHandler<Robmikh::CompositionSurfaceFactory::DeviceLostEventArgs> const& handler) { return m_deviceLostEvent.add(handler); }
+        void DeviceLost(winrt::event_token const& token) noexcept { m_deviceLostEvent.remove(token); }
 
-		IDirect3DDevice^ m_device;
-	};
+    private:
+        void RaiseDeviceLostEvent(Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice const& oldDevice);
 
-	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-	public ref class DeviceLostHelper sealed
-	{
-	public:
-		property IDirect3DDevice^ CurrentlyWatchedDevice
-		{
-			IDirect3DDevice^ get() { return m_device; }
-		}
+        static void CALLBACK OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT waitResult);
+    private:
+        Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice m_device{ nullptr };
+        winrt::event<Windows::Foundation::EventHandler<Robmikh::CompositionSurfaceFactory::DeviceLostEventArgs>> m_deviceLostEvent;
 
-		DeviceLostHelper();
-
-		void WatchDevice(IDirect3DDevice^ device);
-		void StopWatchingCurrentDevice();
-
-		event EventHandler<DeviceLostEventArgs^>^ DeviceLost;
-	private:
-		~DeviceLostHelper();
-		void RaiseDeviceLostEvent(IDirect3DDevice^ oldDevice);
-
-		static void CALLBACK OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT waitResult);
-	private:
-		IDirect3DDevice^ m_device;
-
-		PTP_WAIT OnDeviceLostHandler;
-		HANDLE m_eventHandle;
-		DWORD m_cookie;
-	};
+        PTP_WAIT OnDeviceLostHandler = NULL;
+        HANDLE m_eventHandle = NULL;
+        DWORD m_cookie = NULL;
+    };
 }
+
+namespace winrt::Robmikh::CompositionSurfaceFactory::factory_implementation
+{
+    struct DeviceLostHelper : DeviceLostHelperT<DeviceLostHelper, implementation::DeviceLostHelper>
+    {
+    };
 }

@@ -1,135 +1,229 @@
-#include "pch.h"
-#include "SurfaceFactory.h"
+﻿#include "pch.h"
 #include "SurfaceUtilities.h"
-#include "Lock.h"
 
-using namespace Robmikh::CompositionSurfaceFactory;
-using namespace Platform;
+using namespace winrt;
+using namespace Windows::Foundation;
+using namespace Windows::UI;
+using namespace Windows::UI::Composition;
+using namespace Windows::Graphics::DirectX;
+using namespace Windows::Graphics::DirectX::Direct3D11;
+using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::UI::Composition;
 
-namespace CSF = Robmikh::CompositionSurfaceFactory;
-
-SurfaceUtilities::SurfaceUtilities() { }
-
-void SurfaceUtilities::FillSurfaceWithColor(
-	SurfaceFactory^ surfaceFactory, 
-	CompositionDrawingSurface^ surface, 
-	Windows::UI::Color color, 
-	Size size)
+namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
 {
-	auto lock = surfaceFactory->DrawingLock;
+    void SurfaceUtilities::FillSurfaceWithColor(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface, 
+        Color const& color, 
+        Size const& size)
+    {
+        auto lock = surfaceFactory.DrawingLock();
 
-	// Make the size at least 1x1
-	if (size.IsEmpty)
-	{
-		size = { 1, 1 };
-	}
+        // Make the size at least 1x1
+        auto newSize = size;
+        if (newSize.Width <= 0 && newSize.Height <= 0)
+        {
+            newSize = { 1, 1 };
+        }
 
-	// Resize the surface
-	surfaceFactory->ResizeSurface(surface, size);
+        // Resize the surface
+        surfaceFactory.ResizeSurface(surface, newSize);
 
-	// Clear the surface with the desired color
-	// Because the drawing is done asynchronously and multiple threads could
-	// be trying to get access to the device/surface at the same time, we need
-	// to do any device/surface work under a lock.
-	{
-		auto lockSession = lock->GetLockSession();
+        // Clear the surface with the desired color
+        // Because the drawing is done asynchronously and multiple threads could
+        // be trying to get access to the device/surface at the same time, we need
+        // to do any device/surface work under a lock.
+        {
+            auto lockSession = lock.GetLockSession();
 
-		auto session = CanvasComposition::CreateDrawingSession(surface);
-		session->Clear(color);
-	}
-}
+            auto session = CanvasComposition::CreateDrawingSession(surface);
+            session.Clear(color);
+        }
+    }
 
-void SurfaceUtilities::FillSurfaceWithDirect3DSurface(
-	SurfaceFactory^ surfaceFactory,
-	CompositionDrawingSurface^ surface,
-	IDirect3DSurface^ direct3DSurface,
-	Size size,
-	InterpolationMode interpolation)
-{
-	auto lock = surfaceFactory->DrawingLock;
-	auto canvasDevice = CanvasComposition::GetCanvasDevice(surfaceFactory->GraphicsDevice);
+    void SurfaceUtilities::FillSurfaceWithColor(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface,
+        Color const& color)
+    {
+        FillSurfaceWithColor(
+            surfaceFactory,
+            surface,
+            color,
+            { 0, 0 });
+    }
 
-	auto bitmap = CanvasBitmap::CreateFromDirect3D11Surface(canvasDevice, direct3DSurface);
+    void SurfaceUtilities::FillSurfaceWithDirect3DSurface(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface, 
+        IDirect3DSurface const& direct3DSurface, 
+        Size const& size, 
+        InterpolationMode const& interpolation)
+    {
+        auto lock = surfaceFactory.DrawingLock();
+        auto canvasDevice = CanvasComposition::GetCanvasDevice(surfaceFactory.GraphicsDevice());
 
-	SurfaceUtilities::FillSurfaceWithCanvasBitmap(surfaceFactory, surface, bitmap, size, interpolation);
-}
+        auto bitmap = CanvasBitmap::CreateFromDirect3D11Surface(canvasDevice, direct3DSurface);
 
-IAsyncAction^ SurfaceUtilities::FillSurfaceWithUriAsync(
-	SurfaceFactory^ surfaceFactory,
-	CompositionDrawingSurface^ surface,
-	Uri^ uri,
-	Size size,
-	InterpolationMode interpolation)
-{
-	auto lock = surfaceFactory->DrawingLock;
-	auto canvasDevice = CanvasComposition::GetCanvasDevice(surfaceFactory->GraphicsDevice);
+        implementation::SurfaceUtilities::FillSurfaceWithCanvasBitmap(surfaceFactory, surface, bitmap, size, interpolation);
+    }
 
-	auto bitmapTask = concurrency::create_task(CanvasBitmap::LoadAsync(canvasDevice, uri));
+    void SurfaceUtilities::FillSurfaceWithDirect3DSurface(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface, 
+        IDirect3DSurface const& direct3DSurface, 
+        Size const& size)
+    {
+        FillSurfaceWithDirect3DSurface(
+            surfaceFactory,
+            surface,
+            direct3DSurface,
+            size,
+            API::InterpolationMode::Linear);
+    }
 
-	auto action = bitmapTask.then([=](CanvasBitmap^ bitmap)
-	{
-		FillSurfaceWithCanvasBitmap(surfaceFactory, surface, bitmap, size, interpolation);
-		return;
-	});
+    void SurfaceUtilities::FillSurfaceWithDirect3DSurface(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface, 
+        IDirect3DSurface const& direct3DSurface)
+    {
+        FillSurfaceWithDirect3DSurface(
+            surfaceFactory,
+            surface,
+            direct3DSurface,
+            { 0, 0 });
+    }
 
-	return concurrency::create_async([action]
-	{
-		return action;
-	});
-}
+    IAsyncAction SurfaceUtilities::FillSurfaceWithUriAsync(
+        API::SurfaceFactory const surfaceFactory, 
+        CompositionDrawingSurface const surface, 
+        Uri const uri, 
+        Size const size, 
+        InterpolationMode const interpolation)
+    {
+        auto lock = surfaceFactory.DrawingLock();
+        auto canvasDevice = CanvasComposition::GetCanvasDevice(surfaceFactory.GraphicsDevice());
 
-void SurfaceUtilities::FillSurfaceWithBytes(
-	SurfaceFactory^ surfaceFactory,
-	CompositionDrawingSurface^ surface,
-	const Platform::Array<byte>^ bytes,
-	int widthInPixels,
-	int heightInPixels,
-	Size size,
-	InterpolationMode interpolation)
-{
-	auto lock = surfaceFactory->DrawingLock;
-	auto canvasDevice = CanvasComposition::GetCanvasDevice(surfaceFactory->GraphicsDevice);
+        auto bitmap = co_await CanvasBitmap::LoadAsync(canvasDevice, uri);
 
-	auto bitmap = CanvasBitmap::CreateFromBytes(canvasDevice, bytes, widthInPixels, heightInPixels, Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized);
+        implementation::SurfaceUtilities::FillSurfaceWithCanvasBitmap(surfaceFactory, surface, bitmap, size, interpolation);
+    }
 
-	SurfaceUtilities::FillSurfaceWithCanvasBitmap(surfaceFactory, surface, bitmap, size, interpolation);
-}
+    IAsyncAction SurfaceUtilities::FillSurfaceWithUriAsync(
+        API::SurfaceFactory const surfaceFactory, 
+        CompositionDrawingSurface const surface, 
+        Uri const uri, 
+        Size const size)
+    {
+        co_await FillSurfaceWithUriAsync(
+            surfaceFactory,
+            surface,
+            uri,
+            size,
+            API::InterpolationMode::Linear);
+    }
 
-void SurfaceUtilities::FillSurfaceWithCanvasBitmap(
-	SurfaceFactory^ surfaceFactory,
-	CompositionDrawingSurface^ surface,
-	CanvasBitmap^ bitmap,
-	Size size,
-	InterpolationMode interpolation)
-{
-	auto lock = surfaceFactory->DrawingLock;
+    IAsyncAction SurfaceUtilities::FillSurfaceWithUriAsync(
+        API::SurfaceFactory const surfaceFactory, 
+        CompositionDrawingSurface const surface, 
+        Uri const uri)
+    {
+        co_await FillSurfaceWithUriAsync(
+            surfaceFactory,
+            surface,
+            uri,
+            { 0, 0 });
+    }
 
-	// Determine the size of our bitmap
-	Size bitmapSize = bitmap->Size;
+    void SurfaceUtilities::FillSurfaceWithBytes(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface, 
+        array_view<uint8_t const> bytes,
+        int32_t widthInPixels, 
+        int32_t heightInPixels, 
+        Size const& size, 
+        API::InterpolationMode const& interpolation)
+    {
+        auto lock = surfaceFactory.DrawingLock();
+        auto canvasDevice = CanvasComposition::GetCanvasDevice(surfaceFactory.GraphicsDevice());
 
-	// If the caller did not specify a valid size, then make it the same size as the bitmap
-	if (size.IsEmpty)
-	{
-		size = bitmapSize;
-	}
+        auto bitmap = CanvasBitmap::CreateFromBytes(canvasDevice, bytes, widthInPixels, heightInPixels, DirectXPixelFormat::B8G8R8A8UIntNormalized);
 
-	// Resize the surface
-	surfaceFactory->ResizeSurface(surface, size);
+        implementation::SurfaceUtilities::FillSurfaceWithCanvasBitmap(surfaceFactory, surface, bitmap, size, interpolation);
+    }
 
-	// Draw the bitmap into the surface
-	// Because the drawing is done asynchronously and multiple threads could
-	// be trying to get access to the device/surface at the same time, we need
-	// to do any device/surface work under a lock.
-	{
-		auto lockSession = lock->GetLockSession();
+    void SurfaceUtilities::FillSurfaceWithBytes(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface, 
+        array_view<uint8_t const> bytes,
+        int32_t widthInPixels, 
+        int32_t heightInPixels, 
+        Size const& size)
+    {
+        FillSurfaceWithBytes(
+            surfaceFactory,
+            surface,
+            bytes,
+            widthInPixels,
+            heightInPixels,
+            size,
+            API::InterpolationMode::Linear);
+    }
 
-		{
-			auto session = CanvasComposition::CreateDrawingSession(surface);
-			Rect surfaceRect = { 0, 0, size.Width, size.Height };
-			Rect bitmapRect = { 0, 0, bitmapSize.Width, bitmapSize.Height };
-			CanvasImageInterpolation canvasInterpolation = InterpolationModeHelper::GetCanvasImageInterpolation(interpolation);
-			session->Clear(Windows::UI::Colors::Transparent);
-			session->DrawImage(bitmap, surfaceRect, bitmapRect, 1.0f, canvasInterpolation);
-		}
-	}
+    void SurfaceUtilities::FillSurfaceWithBytes(
+        API::SurfaceFactory const& surfaceFactory, 
+        CompositionDrawingSurface const& surface, 
+        array_view<uint8_t const> bytes,
+        int32_t widthInPixels, 
+        int32_t heightInPixels)
+    {
+        FillSurfaceWithBytes(
+            surfaceFactory,
+            surface,
+            bytes,
+            widthInPixels,
+            heightInPixels,
+            { 0, 0 });
+    }
+
+    void SurfaceUtilities::FillSurfaceWithCanvasBitmap(
+        API::SurfaceFactory const& surfaceFactory,
+        CompositionDrawingSurface const& surface,
+        CanvasBitmap const& bitmap,
+        Size const& size,
+        API::InterpolationMode const& interpolation)
+    {
+        auto lock = surfaceFactory.DrawingLock();
+
+        // Determine the size of our bitmap
+        Size bitmapSize = bitmap.Size();
+
+        // If the caller did not specify a valid size, then make it the same size as the bitmap
+        auto newSize = size;
+        if (newSize.Width <= 0 && newSize.Height <= 0)
+        {
+            newSize = bitmapSize;
+        }
+
+        // Resize the surface
+        surfaceFactory.ResizeSurface(surface, newSize);
+
+        // Draw the bitmap into the surface
+        // Because the drawing is done asynchronously and multiple threads could
+        // be trying to get access to the device/surface at the same time, we need
+        // to do any device/surface work under a lock.
+        {
+            auto lockSession = lock.GetLockSession();
+
+            {
+                auto session = CanvasComposition::CreateDrawingSession(surface);
+                Rect surfaceRect = { 0, 0, newSize.Width, newSize.Height };
+                Rect bitmapRect = { 0, 0, bitmapSize.Width, bitmapSize.Height };
+                CanvasImageInterpolation canvasInterpolation = static_cast<CanvasImageInterpolation>(interpolation);
+                session.Clear(Colors::Transparent());
+                session.DrawImage(bitmap, surfaceRect, bitmapRect, 1.0f, canvasInterpolation);
+            }
+        }
+    }
 }

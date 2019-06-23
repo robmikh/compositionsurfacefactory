@@ -1,8 +1,8 @@
 # CompositionSurfaceFactory
-CompositionSurfaceFactory (formerly known as CompositionImageLoader) is a surface factory intended for use with the Windows.UI.Composition api based on Win2D and written in C++/CX. Don't worry, image loading still comes out of the box!
+CompositionSurfaceFactory is a surface factory intended for use with the Windows.UI.Composition api based on Win2D and written with C++/WinRT. Don't worry, image loading still comes out of the box!
 
 ## Nuget Package
-You can download the latest nuget package for CompositionImageLoader using this command:
+You can download the latest nuget package for CompositionSurfaceFactory using this command:
 ```
 PM>  Install-Package Robmikh.CompositionSurfaceFactory -Pre
 ```
@@ -11,7 +11,7 @@ Learn more [here](https://www.nuget.org/packages/Robmikh.CompositionSurfaceFacto
 ## Usage
 
 ### UriSurface
-UriSurface (formerly ManagedSurface) is just a wrapper to the CompositionDrawingSurface class which handles device lost events raised by the SurfaceFactory. When created with CreateUriSurface, the function will return immediately with a surface that is initialy empty and will be filled in asynchronously. When created with CreateUriSurfaceAsync the surface will be created and the image will be decoded at the same time. This means that when you get the surface back it is guaranteed to be filled in.
+UriSurface is just a wrapper to the CompositionDrawingSurface class which handles device lost events raised by the SurfaceFactory. When created with CreateUriSurface, the function will return immediately with a surface that is initialy empty and will be filled in asynchronously. When created with CreateUriSurfaceAsync the surface will be created and the image will be decoded at the same time. This means that when you get the surface back it is guaranteed to be filled in.
 
 ```
 var uriSurface = _surfaceFactory.CreateUriSurface(new Uri("ms-appx:///Assets/Images/testimage.png"));

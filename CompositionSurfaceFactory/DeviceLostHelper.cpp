@@ -1,95 +1,81 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "DeviceLostHelper.h"
+#include "DeviceLostEventArgs.h"
 
-using namespace Robmikh::CompositionSurfaceFactory;
-using namespace Platform;
-using namespace Windows::Graphics::Display;
-using namespace Microsoft::WRL;
+using namespace winrt;
+using namespace Windows::Foundation;
+using namespace Windows::Graphics::DirectX::Direct3D11;
 
-namespace CSF = Robmikh::CompositionSurfaceFactory;
-
-DeviceLostHelper::DeviceLostHelper()
+namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
 {
-	OnDeviceLostHandler = NULL;
-	m_eventHandle = NULL;
-	m_cookie = NULL;
-}
+    void DeviceLostHelper::WatchDevice(
+        IDirect3DDevice const& device)
+    {
+        // Stop listening for device lost if we currently are
+        StopWatchingCurrentDevice();
 
-DeviceLostHelper::~DeviceLostHelper()
-{
-	StopWatchingCurrentDevice();
-	OnDeviceLostHandler = NULL;
-}
+        // Set the current device to the new device
+        m_device = device;
 
-void
-DeviceLostHelper::WatchDevice(IDirect3DDevice^ device)
-{
-	// Stop listening for device lost if we currently are
-	StopWatchingCurrentDevice();
+        // Get the D3D Device
+        auto d3dDevice = GetDXGIInterfaceFromObject<ID3D11Device4>(device);
 
-	// Set the current device to the new device
-	m_device = device;
+        // Create a wait struct
+        OnDeviceLostHandler = {};
+        OnDeviceLostHandler = CreateThreadpoolWait(DeviceLostHelper::OnDeviceLost, (PVOID)this, NULL);
 
-	// Get the DXGI Device
-	ComPtr<IDXGIDevice> dxgiDevice;
-	__abi_ThrowIfFailed(GetDXGIInterface(device, dxgiDevice.GetAddressOf()));
+        // Create a handle and a cookie
+        m_eventHandle = CreateEvent(NULL, FALSE, FALSE, L"DeviceLost");
+        m_cookie = NULL;
 
-	// QI For the ID3D11Device4 interface
-	ComPtr<ID3D11Device4> d3dDevice;
-	__abi_ThrowIfFailed(dxgiDevice.As(&d3dDevice));
+        // Register for device lost
+        SetThreadpoolWait(OnDeviceLostHandler, m_eventHandle, NULL);
+        check_hresult(d3dDevice->RegisterDeviceRemovedEvent(m_eventHandle, &m_cookie));
+    }
 
-	// Create a wait struct
-	OnDeviceLostHandler = {};
-	OnDeviceLostHandler = CreateThreadpoolWait(DeviceLostHelper::OnDeviceLost, (PVOID)this, NULL);
+    void DeviceLostHelper::StopWatchingCurrentDevice()
+    {
+        if (m_device)
+        {
+            // Get the D3D Device
+            auto d3dDevice = GetDXGIInterfaceFromObject<ID3D11Device4>(m_device);
 
-	// Create a handle and a cookie
-	m_eventHandle = CreateEvent(NULL, FALSE, FALSE, L"DeviceLost");
-	m_cookie = NULL;
+            // Unregister from device lost
+            CloseThreadpoolWait(OnDeviceLostHandler);
+            d3dDevice->UnregisterDeviceRemoved(m_cookie);
 
-	// Register for device lost
-	SetThreadpoolWait(OnDeviceLostHandler, m_eventHandle, NULL);
-	__abi_ThrowIfFailed(d3dDevice->RegisterDeviceRemovedEvent(m_eventHandle, &m_cookie));
-}
+            // Clear member variables
+            OnDeviceLostHandler = NULL;
+            CloseHandle(m_eventHandle);
+            m_eventHandle = NULL;
+            m_cookie = NULL;
+            m_device = nullptr;
+        }
+    }
 
-void
-DeviceLostHelper::StopWatchingCurrentDevice()
-{
-	if (m_device)
-	{
-		// Get the DXGI Device
-		ComPtr<IDXGIDevice> dxgiDevice;
-		__abi_ThrowIfFailed(GetDXGIInterface(m_device, dxgiDevice.GetAddressOf()));
+    void DeviceLostHelper::RaiseDeviceLostEvent(
+        IDirect3DDevice const& oldDevice)
+    {
+        if (m_deviceLostEvent)
+        {
+            m_deviceLostEvent(*this, make<DeviceLostEventArgs>(oldDevice));
+        }
+    }
 
-		// QI For the ID3D11Device4 interface
-		ComPtr<ID3D11Device4> d3dDevice;
-		__abi_ThrowIfFailed(dxgiDevice.As(&d3dDevice));
+    void CALLBACK DeviceLostHelper::OnDeviceLost(
+        PTP_CALLBACK_INSTANCE instance, 
+        PVOID context, 
+        PTP_WAIT wait, 
+        TP_WAIT_RESULT waitResult)
+    {
+        UNREFERENCED_PARAMETER(instance);
+        UNREFERENCED_PARAMETER(wait);
+        UNREFERENCED_PARAMETER(waitResult);
 
-		// Unregister from device lost
-		CloseThreadpoolWait(OnDeviceLostHandler);
-		d3dDevice->UnregisterDeviceRemoved(m_cookie);
+        auto deviceLostHelper = reinterpret_cast<Robmikh::CompositionSurfaceFactory::implementation::DeviceLostHelper*>(context);
+        auto oldDevice = deviceLostHelper->m_device;
+        deviceLostHelper->StopWatchingCurrentDevice();
 
-		// Clear member variables
-		OnDeviceLostHandler = NULL;
-		CloseHandle(m_eventHandle);
-		m_eventHandle = NULL;
-		m_cookie = NULL;
-		m_device = nullptr;
-	}
-}
-
-void
-DeviceLostHelper::RaiseDeviceLostEvent(IDirect3DDevice^ oldDevice)
-{
-	DeviceLost(this, DeviceLostEventArgs::Create(oldDevice));
-}
-
-void CALLBACK
-DeviceLostHelper::OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT waitResult)
-{
-	OutputDebugString(L"CompositionSurfaceFactory - Device Lost");
-	auto deviceLostHelper = reinterpret_cast<DeviceLostHelper^>(context);
-	auto oldDevice = deviceLostHelper->m_device;
-	deviceLostHelper->StopWatchingCurrentDevice();
-
-	deviceLostHelper->RaiseDeviceLostEvent(oldDevice);
+        deviceLostHelper->RaiseDeviceLostEvent(oldDevice);
+    }
 }

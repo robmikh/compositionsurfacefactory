@@ -1,23 +1,34 @@
-﻿#pragma once
+﻿//
+// pch.h
+// Header for platform projection include files
+//
 
-#include <collection.h>
-#include <ppltasks.h>
-#include <pplawait.h>
+#pragma once
+
+#include <unknwn.h>
+#include <inspectable.h>
+
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.UI.h>
+#include <winrt/Windows.UI.Composition.h>
+#include <winrt/Windows.Graphics.h>
+#include <winrt/Windows.Graphics.DirectX.h>
+#include <winrt/Windows.Graphics.DirectX.Direct3D11.h>
+
+#include <winrt/Microsoft.Graphics.Canvas.h>
+#include <winrt/Microsoft.Graphics.Canvas.UI.Composition.h>
+#include <winrt/Microsoft.Graphics.Canvas.Text.h>
+
+#include <atomic>
+#include <memory>
+#include <algorithm>
+#include <vector>
+#include <iterator>
 
 #include <d3d11_4.h>
-#include <Windows.Graphics.DirectX.Direct3D11.interop.h>
+#include <dxgi1_6.h>
 
-using namespace Platform::Collections;
-using namespace Windows::Foundation::Collections;
+#include "direct3d11.interop.h"
 
-using namespace Windows::Foundation;
-using namespace Windows::UI::Text;
-using namespace Windows::UI::Composition;
-using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
-using namespace Microsoft::Graphics::Canvas::UI::Composition;
-using namespace Windows::Graphics::DirectX::Direct3D11;
-
-namespace WF = Windows::Foundation;
-namespace WUT = Windows::UI::Text;
-namespace WUC = Windows::UI::Composition;
+#include <winrt/Robmikh.CompositionSurfaceFactory.h>
+namespace API = winrt::Robmikh::CompositionSurfaceFactory;
