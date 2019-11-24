@@ -12,6 +12,9 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>CompositionSurfaceFactory is a surface factory intended for use with the Windows.UI.Composition API based on Win2D and written with C++/WinRT. Automatic image loading and text.</description>
     <releaseNotes>Release notes:
+Version 0.8.3:
+* Add ARM64 support
+
 Version 0.8.2:
 * Minor fixes to C++/WinRT version
 * First C++/WinRT-based release!
@@ -25,7 +28,7 @@ Version 0.8.0-prerelease:
 </releaseNotes>
     <copyright>Copyright 2016</copyright>
 	  <dependencies>
-        <dependency id="Win2D.uwp" version="1.23.0" />
+        <dependency id="Win2D.uwp" version="1.24.0" />
     </dependencies>
   </metadata>
   <files>
@@ -38,6 +41,10 @@ Version 0.8.0-prerelease:
       <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.dll" src="..\ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-arm\native" src="..\ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
       <file target="runtimes\win10-arm\native\Robmikh.CompositionSurfaceFactory.pdb" src="..\ARM\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pdb" />
+
+      <file target="runtimes\win10-arm64\native\Robmikh.CompositionSurfaceFactory.dll" src="..\ARM64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.dll" />
+      <file target="runtimes\win10-arm64\native" src="..\ARM64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
+      <file target="runtimes\win10-arm64\native\Robmikh.CompositionSurfaceFactory.pdb" src="..\ARM64\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pdb" />
 
       <file target="runtimes\win10-x86\native\Robmikh.CompositionSurfaceFactory.dll" src="..\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.dll" />
       <file target="runtimes\win10-x86\native" src="..\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.pri" />
