@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /CompositionSurfaceFactory/Generated Files
+
+temp/

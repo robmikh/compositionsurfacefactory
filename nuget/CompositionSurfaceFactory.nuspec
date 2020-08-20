@@ -1,17 +1,21 @@
 <?xml version="1.0"?>
 <package >
-  <metadata minClientVersion="2.5">
+  <metadata minClientVersion="5.3">
     <id>Robmikh.CompositionSurfaceFactory</id>
     <version>0.0.0-SpecifyVersionOnCommandline</version>
     <title>Robmikh.CompositionSurfaceFactory</title>
     <authors>Robert Mikhayelyan</authors>
     <owners>Robert Mikhayelyan</owners>
-    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <license type="expression">MIT</license>
     <projectUrl>https://github.com/robmikh/compositionsurfacefactory</projectUrl>
-    <iconUrl>http://robmikh.com/compimageloader.png</iconUrl>
+    <icon>images\icon.png</icon>
+    <iconUrl>https://robmikh.com/compsurfacefactory.png</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>CompositionSurfaceFactory is a surface factory intended for use with the Windows.UI.Composition API based on Win2D and written with C++/WinRT. Automatic image loading and text.</description>
     <releaseNotes>Release notes:
+Version 0.8.4:
+* Add desktop support
+
 Version 0.8.3:
 * Add ARM64 support
 
@@ -28,12 +32,19 @@ Version 0.8.0-prerelease:
 </releaseNotes>
     <copyright>Copyright 2016</copyright>
 	  <dependencies>
-        <dependency id="Win2D.uwp" version="1.24.0" />
+      <group targetFramework="UAP10.0">
+        <dependency id="Win2D.uwp" version="1.25.0" />
+      </group>
     </dependencies>
   </metadata>
   <files>
-      <file target="build\native\Robmikh.CompositionSurfaceFactory.targets" src="CompositionSurfaceFactory.targets" />
+      <file target="images\icon.png" src="icon.png" />
+
+      <file target="build\native\Robmikh.CompositionSurfaceFactory.targets" src="CompositionSurfaceFactory.native.targets" />
       <file target="build\native\Robmikh.CompositionSurfaceFactory.props" src="CompositionSurfaceFactory.props" />
+
+      <file target="build\netcoreapp3.0\Robmikh.CompositionSurfaceFactory.targets"  src="CompositionSurfaceFactory.net.targets" />
+      <file target="build\net45\Robmikh.CompositionSurfaceFactory.targets"          src="CompositionSurfaceFactory.net.targets" />
 
       <file target="lib\uap10.0" src="..\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.winmd" />
       <file target="lib\uap10.0\Robmikh.CompositionSurfaceFactory.xml" src="..\Release\CompositionSurfaceFactory\Robmikh.CompositionSurfaceFactory.xml" />

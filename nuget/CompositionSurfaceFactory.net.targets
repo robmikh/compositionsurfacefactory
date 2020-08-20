@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <compositionSurfaceFactory-Platform Condition="$(RuntimeIdentifier.EndsWith('-x64'))">x64</compositionSurfaceFactory-Platform>
+    <compositionSurfaceFactory-Platform Condition="$(RuntimeIdentifier.EndsWith('-x86'))">x86</compositionSurfaceFactory-Platform>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(compositionSurfaceFactory-Platform)' == ''">
+    <compositionSurfaceFactory-Platform Condition="'$(Platform)' == 'Win32'">x86</compositionSurfaceFactory-Platform>
+    <compositionSurfaceFactory-Platform Condition="'$(Platform)' != 'Win32'">$(Platform)</compositionSurfaceFactory-Platform>
+    <compositionSurfaceFactory-Platform Condition="'$(Platform)' == 'AnyCPU'"></compositionSurfaceFactory-Platform>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Robmikh.CompositionSurfaceFactory">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\lib\uap10.0\Robmikh.CompositionSurfaceFactory.winmd</HintPath>
+      <Implementation>Robmikh.CompositionSurfaceFactory.dll</Implementation>
+    </Reference>
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-$(compositionSurfaceFactory-Platform)\native\Robmikh.CompositionSurfaceFactory.dll" Condition="'$(compositionSurfaceFactory-Platform)' != ''" />
+  </ItemGroup>
+
+  <Target Name="PlatformCheck" BeforeTargets="InjectReference"
+    Condition=" ( ('$(compositionSurfaceFactory-Platform)' != 'x86') AND ('$(compositionSurfaceFactory-Platform)' != 'ARM') AND ('$(compositionSurfaceFactory-Platform)' != 'x64') AND ('$(compositionSurfaceFactory-Platform)' != 'ARM64') )">
+    <Error  Text="$(MSBuildThisFileName) does not work correctly on '$(Platform)' 
+                     platform. You need to specify platform (x86, x64, ARM, or ARM64)." />
+  </Target>
+
+</Project>

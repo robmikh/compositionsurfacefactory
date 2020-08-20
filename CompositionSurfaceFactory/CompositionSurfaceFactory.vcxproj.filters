@@ -36,8 +36,8 @@
     <ClInclude Include="direct3d11.interop.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Robmikh.CompositionSurfaceFactory.def" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Robmikh.CompositionSurfacFactory.idl" />
