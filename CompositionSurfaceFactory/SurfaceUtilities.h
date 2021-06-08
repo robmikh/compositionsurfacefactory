@@ -4,10 +4,9 @@
 
 namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
 {
-    struct SurfaceUtilities : SurfaceUtilitiesT<SurfaceUtilities>
+    struct SurfaceUtilities
     {
         SurfaceUtilities() = delete;
-
 
         static void FillSurfaceWithColor(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Windows::UI::Color const& color, Windows::Foundation::Size const& size);
         static void FillSurfaceWithColor(Robmikh::CompositionSurfaceFactory::SurfaceFactory const& surfaceFactory, Windows::UI::Composition::CompositionDrawingSurface const& surface, Windows::UI::Color const& color);

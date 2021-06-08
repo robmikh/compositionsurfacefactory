@@ -100,7 +100,7 @@ namespace winrt::Robmikh::CompositionSurfaceFactory::implementation
             m_surface.Close();
             m_surface = nullptr;
             m_surfaceFactory = nullptr;
-            m_text = nullptr;
+            m_text = L"";
             m_textLayout = nullptr;
             m_textFormat = nullptr;
         }
